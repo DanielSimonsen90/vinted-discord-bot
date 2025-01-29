@@ -1,9 +1,10 @@
-import pkg, { IntentsBitField } from 'discord.js';
-const { Client, GatewayIntentBits } = pkg;
+import { IntentsBitField, Client, GatewayIntentBits, ActivityType } from 'discord.js';
 import { registerCommands, handleCommands } from './bot/commands_handler.js';
 import ConfigurationManager from './utils/config_manager.js';
 import Logger from './utils/logger.js';
 import crud from './crud.js';
+
+import createAndSubToPushes from './mikkel-resell/create-and-sub-to-pushes.js';
 
 const client = new Client({
     intents: [
@@ -16,6 +17,8 @@ const client = new Client({
     ]
 });
 
+createAndSubToPushes(client);
+
 const discordConfig = ConfigurationManager.getDiscordConfig;
 const devMode = ConfigurationManager.getDevMode;
 
@@ -25,7 +28,7 @@ client.once('ready', async () => {
     if (devMode) {
         client.user.setPresence({ activities: [{ name: 'in dev mode' }], status: 'online' });
     } else {
-        client.user.setPresence({ activities: [{ name: 'Vinted' }], status: 'online' });
+        client.user.setPresence({ activities: [{ name: 'Vinted', type: ActivityType.Watching }], status: 'online' });
     }
 });
 
