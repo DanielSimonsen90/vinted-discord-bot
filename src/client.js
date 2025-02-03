@@ -28,8 +28,6 @@ client.once('ready', async () => {
     } else {
         client.user.setPresence({ activities: [{ name: 'Vinted', type: ActivityType.Watching }], status: 'online' });
     }
-
-    doDanhoThing(client);
 });
 
 // Change presence to show number of channels being monitored
