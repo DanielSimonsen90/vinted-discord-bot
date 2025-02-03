@@ -5,10 +5,7 @@ class EventEmitter {
 
     // Subscribe to an event
     on(event, listener) {
-        if (!this.events[event]) {
-            this.events[event] = [];
-        }
-        this.events[event].push(listener);
+        (this.events[event] ??= []).push(listener);
     }
 
     // Unsubscribe from an event

@@ -31,14 +31,6 @@ class ConfigurationManager {
     }
     
     /**
-     * Retrieves the MongoDB configuration section from environment variables.
-     * @returns {Object} MongoDB configuration object.
-     */
-    static getMongoDBConfig = {
-        uri: process.env.MONGODB_URI
-    }
-    
-    /**
      * Retrieves the user configuration from environment variables.
      * @returns {Object} User configuration object.
      */

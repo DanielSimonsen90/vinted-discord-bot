@@ -70,7 +70,7 @@ class ProxyManager {
             return proxy
         }
         
-        Logger.error('No proxies available.');
+        // Logger.error('No proxies available.');
 
         return undefined;
     }

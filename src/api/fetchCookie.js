@@ -16,7 +16,8 @@ export async function fetchCookie() {
     return await executeWithDetailedHandling( async () => {
         const url = `https://www.vinted.${extension}`
 
-        const response = await RequestBuilder.get(url).setNextProxy().send();
+        // const response = await RequestBuilder.get(url).setNextProxy().send();
+        const response = await RequestBuilder.get(url).send();
 
         if (response && response.headers['set-cookie']) {
 

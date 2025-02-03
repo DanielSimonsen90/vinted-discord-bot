@@ -3,7 +3,7 @@ import RequestBuilder from "../utils/request_builder.js";
 import ConfigurationManager from "../utils/config_manager.js";
 import { NotFoundError } from "../helpers/execute_helper.js";
 
-const extension = ConfigurationManager.getAlgorithmSetting.vinted_api_domain_extension
+const extension = ConfigurationManager.getAlgorithmSetting.vinted_api_domain_extension;
 
 /**
  * Fetch all catalog categories from Vinted
@@ -16,9 +16,9 @@ export async function fetchCatalogInitializer({ cookie }) {
         const url = `https://www.vinted.${extension}/api/v2/catalog/initializers`;
 
         const response = await RequestBuilder.get(url)
-                        .setNextProxy()
-                        .setCookie(cookie)
-                        .send();
+            // .setNextProxy()
+            .setCookie(cookie)
+            .send();
 
         if (!response.success) {
             throw new NotFoundError("Error fetching catalog items.");

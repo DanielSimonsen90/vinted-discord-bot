@@ -1,7 +1,7 @@
 import ProxyManager from "./src/utils/proxy_manager.js";
 import { VintedItem } from "./src/entities/vinted_item.js";
 import { filterItemsByUrl } from "./src/services/url_service.js";
-import { Preference, buildCategoryMapFromRoots } from "./src/database.js";
+import { Preference, buildCategoryMapFromRoots } from "./src/database/index.js";
 import client from "./src/client.js";
 import ConfigurationManager from "./src/utils/config_manager.js";
 import { postMessageToChannel, checkVintedChannelInactivity } from "./src/services/discord_service.js";
@@ -67,7 +67,9 @@ setInterval(async () => {
     }
 }, 60000);  // 60 seconds
 
-const getCatalogRoots = async (cookie) => {
+Logger.info('Fetching catalog roots from Vinted');
+
+await (async function getCatalogRoots(cookie) {
     let found = false;
     while (!found) {
         try {
@@ -83,11 +85,7 @@ const getCatalogRoots = async (cookie) => {
             await new Promise(resolve => setTimeout(resolve, 200));
         }
     }
-}
-
-Logger.info('Fetching catalog roots from Vinted');
-
-await getCatalogRoots(cookie);
+})(cookie)
 
 const sendToChannel = async (item, user, vintedChannel) => {
     // get the domain from the URL between vinted. and the next /

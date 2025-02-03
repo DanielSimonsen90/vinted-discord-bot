@@ -3,7 +3,7 @@ import { createBaseEmbed, sendErrorEmbed, sendWaitingEmbed, sendWarningEmbed } f
 import crud from '../../crud.js';
 import t from '../../t.js';
 import Logger from '../../utils/logger.js';
-import { Preference, ShippableMap } from '../../database.js';
+import { Preference, ShippableMap } from '../../database/index.js';
 
 export const data = new SlashCommandBuilder()
     .setName('start_monitoring')
@@ -131,6 +131,6 @@ export async function execute(interaction) {
         await crud.startVintedChannelMonitoring(vintedChannel._id, url);
     } catch (error) {
         console.error('Error starting monitoring session:', error);
-        await sendErrorEmbed(interaction, 'There was an error starting the monitoring session.');
+        // await sendErrorEmbed(interaction, 'There was an error starting the monitoring session.');
     }
 }

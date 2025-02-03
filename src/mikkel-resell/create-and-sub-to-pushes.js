@@ -4,13 +4,13 @@ import * as Discord from 'discord.js';
  * @param {Discord.Client} client 
  * @returns 
  */
-export async function handleGit(client) {
+export default async function handleGit(client) {
   const guildId = process.env.DISCORD_GUILD_ID;
   const guild = client.guilds.cache.get(guildId);
   if (!guild) return console.error('No guild found');
 
   const gitChannel = guild.channels.cache.find(channel => channel.name.startsWith('git'))
-    ?? guild.channels.create('git', {
+    ?? await guild.channels.create('git', {
       type: Discord.ChannelType.GuildText,
       topic: `Kanal til selv-opdateringer af ${client.user.username}.`,
       reason: 'Git channel setup'

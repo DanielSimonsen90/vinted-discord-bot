@@ -1,7 +1,7 @@
 import { SlashCommandBuilder, StringSelectMenuBuilder, ActionRowBuilder } from 'discord.js';
 import { createBaseEmbed, sendErrorEmbed, sendSuccessEmbed, sendWaitingEmbed } from '../components/base_embeds.js';
 import crud from '../../crud.js';
-import { Preference } from '../../database.js';
+import { Preference } from '../../database/index.js';
 import t from '../../t.js';
 
 export const data = new SlashCommandBuilder()
