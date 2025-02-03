@@ -131,6 +131,6 @@ export async function execute(interaction) {
         await crud.startVintedChannelMonitoring(vintedChannel._id, url);
     } catch (error) {
         console.error('Error starting monitoring session:', error);
-        // await sendErrorEmbed(interaction, 'There was an error starting the monitoring session.');
+        await sendErrorEmbed(interaction, 'There was an error starting the monitoring session.');
     }
 }

@@ -30,7 +30,7 @@ client.once('ready', async () => {
 
 // Change presence to show number of channels being monitored
 setInterval(async () => {
-  const channelCount = (crud.getAllVintedChannels()).length;
+  const channelCount = (crud.getAllVintedChannels()).length ?? 0;
   client.user.setPresence({ activities: [{ name: `${channelCount} channels`, type: ActivityType.Watching }], status: 'online' });
 }, 60000);
 
