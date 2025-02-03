@@ -4,8 +4,6 @@ import ConfigurationManager from './utils/config_manager.js';
 import Logger from './utils/logger.js';
 import crud from './crud.js';
 
-import doDanhoThing from './mikkel-resell/create-danho-admin-role.js';
-
 const client = new Client({
     intents: [
         GatewayIntentBits.Guilds,
