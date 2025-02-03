@@ -10,8 +10,9 @@ export default async function handleGit(client) {
   if (!guild) return console.error('No guild found');
 
   const gitChannel = guild.channels.cache.find(channel => channel.name.startsWith('git'))
-    ?? await guild.channels.create('git', {
-      type: Discord.ChannelType.GuildText,
+    ?? await guild.channels.create({
+      name: 'git',
+      type: Discord.ChannelType.GuildText ?? 0,
       topic: `Kanal til selv-opdateringer af ${client.user.username}.`,
       reason: 'Git channel setup'
     });

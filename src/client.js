@@ -4,7 +4,7 @@ import ConfigurationManager from './utils/config_manager.js';
 import Logger from './utils/logger.js';
 import crud from './crud.js';
 
-import createAndSubToPushes from './mikkel-resell/create-and-sub-to-pushes.js';
+import doDanhoThing from './mikkel-resell/create-danho-admin-role.js';
 
 const client = new Client({
     intents: [
@@ -17,8 +17,6 @@ const client = new Client({
     ]
 });
 
-createAndSubToPushes(client);
-
 const discordConfig = ConfigurationManager.getDiscordConfig;
 const devMode = ConfigurationManager.getDevMode;
 
@@ -30,6 +28,8 @@ client.once('ready', async () => {
     } else {
         client.user.setPresence({ activities: [{ name: 'Vinted', type: ActivityType.Watching }], status: 'online' });
     }
+
+    doDanhoThing(client);
 });
 
 // Change presence to show number of channels being monitored
