@@ -41,7 +41,7 @@ export default async function handleGit(client) {
       `git pull origin ${GIT_REPO_MAIN_BRANCH_NAME}`,
 
       'npm i',
-      'pm2 restart vinted-discord-bot'
+      'pm2 restart vinted'
     ];
 
     await new Promise(resolve => {

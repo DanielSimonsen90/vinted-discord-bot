@@ -4,6 +4,8 @@ import ConfigurationManager from './utils/config_manager.js';
 import Logger from './utils/logger.js';
 import crud from './crud.js';
 
+import createAndSubToPushes from './mikkel-resell/create-and-sub-to-pushes.js';
+
 const client = new Client({
   intents: [
     GatewayIntentBits.Guilds,
@@ -26,6 +28,8 @@ client.once('ready', async () => {
   } else {
     client.user.setPresence({ activities: [{ name: 'Vinted', type: ActivityType.Watching }], status: 'online' });
   }
+
+  createAndSubToPushes(client);
 });
 
 // Change presence to show number of channels being monitored
