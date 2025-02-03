@@ -1,4 +1,5 @@
 import * as Discord from 'discord.js';
+import shell from 'shelljs';
 
 /**
  * @param {Discord.Client} client 
