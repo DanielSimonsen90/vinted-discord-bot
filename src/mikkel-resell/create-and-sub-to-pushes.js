@@ -9,13 +9,13 @@ export default async function handleGit(client) {
   const guild = client.guilds.cache.get(guildId);
   if (!guild) return console.error('No guild found');
 
-  const gitChannel = guild.channels.cache.find(channel => channel.name.startsWith('git'))
-    ?? await guild.channels.create({
-      name: 'git',
-      type: Discord.ChannelType.GuildText ?? 0,
-      topic: `Kanal til selv-opdateringer af ${client.user.username}.`,
-      reason: 'Git channel setup'
-    });
+  const gitChannel = guild.channels.cache.find(channel => channel.name.startsWith('git'));
+  if (!gitChannel) {
+    const danho = client.users.cache.find(u => u.username === 'danhosaur');
+    if (!danho) console.error("Git channel & Danho not found.");
+    else danho.send('Git channel not found')
+    return;
+  }
   
   const { GIT_REPO_NAME, GIT_REPO_MAIN_BRANCH_NAME } = process.env;
 
