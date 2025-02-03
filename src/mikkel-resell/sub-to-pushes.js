@@ -14,11 +14,20 @@ export default async function handleGit(client) {
   if (!gitChannel) {
     const danho = client.users.cache.find(u => u.username === 'danhosaur');
     if (!danho) console.error("Git channel & Danho not found.");
-    else danho.send('Git channel not found')
+    else danho.send('Git channel not found');
     return;
   }
-  
+
   const { GIT_REPO_NAME, GIT_REPO_MAIN_BRANCH_NAME } = process.env;
+
+  const messages = await gitChannel.messages.fetch({ limit: 5 });
+  if (!messages) return console.warn(`Could not fetch messages from git channel`);
+
+  const reactedMessage = messages.find(m => m.reactions.cache.find(reaction => reaction.users.cache.has(client.user.id)));
+  if (!reactedMessage) return console.warn(`Could not find message that ${client.user.name} reacted to`);
+
+  await reactedMessage.reactions.cache.get(`⬇️`)?.remove();
+  await reactedMessage.react(`✅`);
 
   client.on('messageCreate', async message => {
     // Channel checks
@@ -30,9 +39,9 @@ export default async function handleGit(client) {
     ] = [GIT_REPO_NAME, GIT_REPO_MAIN_BRANCH_NAME].map(value => message.embeds[0]?.title?.includes(value));
 
     if (!isGitChannelId || !containsEmbed || !embedTitleContainsRepoName || !embedTitleContainsMainBranchName) return;
-    
+
     // Visualize update
-    client.user.setPresence({ status: 'idle' })
+    client.user.setPresence({ status: 'idle' });
     await message.react('⬇️');
 
     // Pull main branch
@@ -52,14 +61,4 @@ export default async function handleGit(client) {
       });
     });
   });
-  client.once('ready', async client => {
-    const messages = await gitChannel.messages.fetch({ limit: 5 });
-    if (!messages) return console.warn(`Could not fetch messages from git channel`);
-
-    const reactedMessage = messages.find(m => m.reactions.cache.find(reaction => reaction.users.cache.has(client.user.id)));
-    if (!reactedMessage) return console.warn(`Could not find message that vinted-discord-bot reacted to`);
-
-    await reactedMessage.reactions.cache.get(`⬇️`)?.remove();
-    await reactedMessage.react(`✅`);
-  })
 }
