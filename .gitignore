@@ -5,6 +5,7 @@ node_modules
 *.log
 package-lock.json
 
+data/
 .env.local
 
 .DS_Store
