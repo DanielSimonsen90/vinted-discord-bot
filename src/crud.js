@@ -9,7 +9,7 @@ import EventEmitter from "./utils/event_emitter.js";
 import ConfigurationManager from "./utils/config_manager.js";
 
 const userDefaultConfig = ConfigurationManager.getUserConfig;
-const discordAdminIds = ConfigurationManager.getDiscordConfig.role_admin_ids;
+const discordAdminIds = ConfigurationManager.getDiscordConfig.adminRoleIds;
 const eventEmitter = new EventEmitter();
 
 /**
@@ -36,7 +36,7 @@ function sendErrorEmbed(interaction, messageContent) {
  * @returns {Promise<User>} - The created user.
  */
 async function createUser({ discordId, preferences = {}, channels = [], lastUpdated = new Date() }) {
-  const user = UserRepository.addOne({ discordId, preferences, channels, lastUpdated, maxChannels: userDefaultConfig.max_private_channels_default });
+  const user = UserRepository.addOne({ discordId, preferences, channels, lastUpdated, maxChannels: userDefaultConfig.defaultMaxPrivateChannels });
   UserRepository.save();
   eventEmitter.emit('updated');
 
@@ -343,7 +343,7 @@ async function getAllPrivateVintedChannels() {
   return VintedChannelRepository.find({ type: 'private' })?.populate({
     property: 'user',
     repo: UserRepository
-  });
+  }) ?? [];
 }
 
 function parseVintedSearchParams(url) {

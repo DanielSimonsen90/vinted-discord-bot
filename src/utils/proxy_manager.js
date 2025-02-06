@@ -20,8 +20,8 @@ class ProxyManager {
   static async init(maxRetries = 99, retryDelay = 5000) {
     for (let attempt = 0; attempt < maxRetries; attempt++) {
       try {
-        if (proxy_settings.use_webshare) {
-          this.proxies = await listProxies(proxy_settings.webshare_api_key);
+        if (proxy_settings.useWebshare) {
+          this.proxies = await listProxies(proxy_settings.webshareApiKey);
           Logger.info(`Loaded ${this.proxies.length} proxies from Webshare.`);
         } else {
           // Read the proxy file

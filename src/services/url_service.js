@@ -5,7 +5,7 @@ import Logger from '../utils/logger.js';
 import { isSubcategory } from '../database/index.js';
 import ConfigurationManager from '../utils/config_manager.js';
 
-const blacklisted_countries_codes = ConfigurationManager.getAlgorithmSetting.blacklisted_countries_codes;
+const blacklisted_countries_codes = ConfigurationManager.getAlgorithmSetting.blacklistedCountryCodes;
 
 function parseVintedSearchParams(url) {
   try {

@@ -3,7 +3,7 @@ import Logger from "../utils/logger.js";
 import ConfigurationManager from "../utils/config_manager.js";
 import RequestBuilder from "../utils/request_builder.js";
 
-const extension = ConfigurationManager.getAlgorithmSetting.vinted_api_domain_extension;
+const extension = ConfigurationManager.getAlgorithmSetting.vintedApiDomainExtension;
 
 /**
  * Fetches the session cookie from the headers of the response to a GET request to the given URL.

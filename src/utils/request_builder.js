@@ -4,7 +4,7 @@ import { getRandom } from 'random-useragent';
 import Logger from './logger.js';
 import ConfigurationManager from './config_manager.js';
 
-const vinted_api_domain_extension = ConfigurationManager.getAlgorithmSetting.vinted_api_domain_extension;
+const vinted_api_domain_extension = ConfigurationManager.getAlgorithmSetting.vintedApiDomainExtension;
 
 const BASE_HEADERS = {
   'Accept': 'application/json, text/plain, */*',

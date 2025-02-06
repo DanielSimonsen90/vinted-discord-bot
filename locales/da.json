@@ -72,5 +72,12 @@
   "channel-deleted": "Kanal slettet.",
   "no-channels-found": "Ingen kanaler fundet, du bør måske oprette en først.",
   "deleting-all-private-channels": "Sletter alle private kanaler...",
-  "must-have-brand-query-param": "URL skal have brand forespørgselsparameter. Søg venligst efter mindst et brand."
+  "must-have-brand-query-param": "URL skal have brand forespørgselsparameter. Søg venligst efter mindst et brand.",
+
+  "pause": "Pause",
+  "pause-state": "Pause tilstand",
+  "pause-paused": "Pauset",
+  "pause-resumed": "Genoptaget",
+  "pause-start": "Start",
+  "pause-end": "Slut"
 }

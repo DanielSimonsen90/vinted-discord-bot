@@ -20,7 +20,7 @@ export class User extends Model {
   constructor({
     discordId, lastUpdated,
     channels = [], 
-    maxChannels = ConfigurationManager.getUserConfig.max_private_channels_default, 
+    maxChannels = ConfigurationManager.getUserConfig.defaultMaxPrivateChannels, 
     preferences = {}
   }) {
     super();

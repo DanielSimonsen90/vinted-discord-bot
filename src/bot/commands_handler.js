@@ -10,7 +10,7 @@ const __dirname = path.dirname(fileURLToPath(import.meta.url));
 
 const commands = [];
 const commandFiles = fs.readdirSync(path.join(__dirname, 'commands')).filter(file => file.endsWith('.js'));
-const commandChannelId = ConfigurationManager.getDiscordConfig.command_channel_id;
+const commandChannelId = ConfigurationManager.getDiscordConfig.commandChannelId;
 
 // Using dynamic imports to load command modules
 async function loadCommands() {
@@ -27,7 +27,7 @@ export async function registerCommands(client, discordConfig) {
   try {
     Logger.info('Started refreshing application (/) commands.');
     await rest.put(
-      Routes.applicationCommands(discordConfig.client_id),
+      Routes.applicationCommands(discordConfig.clientId),
       { body: commands }
     );
     Logger.info('Successfully reloaded application (/) commands.');
@@ -60,7 +60,10 @@ export async function handleCommands(interaction) {
 
     // prevent crash if interaction is not found
     try {
-      await interaction.reply({ content: 'There was an error while executing this command!', ephemeral: true });
+      await interaction.reply({ 
+        content: 'There was an error while executing this command!', 
+        ephemeral: true 
+      });
     }
     catch (error) {
       Logger.error('Error replying to interaction:', error);

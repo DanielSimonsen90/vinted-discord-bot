@@ -3,7 +3,7 @@ import RequestBuilder from "../utils/request_builder.js";
 import ConfigurationManager from "../utils/config_manager.js";
 import { NotFoundError } from "../helpers/execute_helper.js";
 
-const extension = ConfigurationManager.getAlgorithmSetting.vinted_api_domain_extension;
+const extension = ConfigurationManager.getAlgorithmSetting.vintedApiDomainExtension;
 
 /**
  * Fetch catalog items from Vinted.

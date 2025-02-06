@@ -9,8 +9,8 @@ import { createBaseEmbed } from '../bot/components/base_embeds.js';
 import t from '../t.js';
 
 const discordConfig = ConfigurationManager.getDiscordConfig;
-const guildId = discordConfig.guild_id;
-const threadChannelId = discordConfig.thread_channel_id;
+const guildId = discordConfig.guildId;
+const threadChannelId = discordConfig.threadChannelId;
 
 /**
  * Create a category on Discord if it doesn't exist.
@@ -63,7 +63,6 @@ function hoursAgo(date) {
 }
 
 /**
- * 
  * @param {Client} client 
  */
 export async function checkVintedChannelInactivity(client) {
@@ -78,7 +77,7 @@ export async function checkVintedChannelInactivity(client) {
       if (keepMessageSent) continue;
 
       // Check if the lastUpdated is more than 72 hours ago
-      if (hoursAgo(lastUpdated) > discordConfig.channel_inactivity_hours) {
+      if (hoursAgo(lastUpdated) > discordConfig.channelInactivityHours) {
         const userData = await crud.getUserById(user);
         if (!userData) continue;
 
@@ -121,7 +120,7 @@ export async function checkVintedChannelInactivity(client) {
         // Create a message component collector to wait for the user's response
         message.createMessageComponentCollector({
           filter: i => i.user.id === userData.discordId,
-          time: discordConfig.channel_inactivity_delete_hours * 60 * 60 * 1000, // 24 hours in milliseconds
+          time: discordConfig.channelInactivityDeleteHours * 60 * 60 * 1000, // 24 hours in milliseconds
         }).on('collect', async interaction => {
           if (interaction.customId === 'keep_channel' + userData.discordId) {
             // User wants to keep the channel

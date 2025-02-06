@@ -1,7 +1,7 @@
 import ProxyManager from "./src/utils/proxy_manager.js";
 import { VintedItem } from "./src/entities/vinted_item.js";
 import { filterItemsByUrl } from "./src/services/url_service.js";
-import { Preference, buildCategoryMapFromRoots } from "./src/database/index.js";
+import { Preference, SettingsRepository, buildCategoryMapFromRoots } from "./src/database/index.js";
 import client from "./src/client.js";
 import ConfigurationManager from "./src/utils/config_manager.js";
 import { postMessageToChannel, checkVintedChannelInactivity } from "./src/services/discord_service.js";
@@ -20,7 +20,7 @@ try {
 }
 
 const algorithmSettings = ConfigurationManager.getAlgorithmSetting;
-CatalogService.initializeConcurrency(algorithmSettings.concurrent_requests);
+CatalogService.initializeConcurrency(algorithmSettings.concurrentRequests);
 
 const getCookie = async () => (await fetchCookie()).cookie;
 const refreshCookie = async () => {
@@ -29,7 +29,7 @@ const refreshCookie = async () => {
     try {
       cookie = await getCookie();
       if (cookie) {
-        Logger.info('Fetched cookie from Vinted');
+        // Logger.info('Fetched cookie from Vinted');
         return cookie;
       }
     } catch (error) {
@@ -52,7 +52,7 @@ var cookie = await refreshCookie();
 
 setInterval(async () => {
   try {
-    cookie = await refreshCookie();
+    if (!SettingsRepository.current.paused) cookie = await refreshCookie();
   } catch (error) {
     Logger.debug('Error refreshing cookie');
   }
@@ -120,7 +120,7 @@ const monitorChannels = () => {
     Logger.debug('Handling item');
     const item = new VintedItem(rawItem);
 
-    if (item.getNumericStars() === 0 && algorithmSettings.filter_zero_stars_profiles) return;
+    if (item.getNumericStars() === 0 && algorithmSettings.filterZeroStarsProfiles) return;
 
     let rawItemBrandId = item.brandId;
     rawItemBrandId = rawItemBrandId ? rawItemBrandId.toString() : null;
@@ -149,7 +149,7 @@ const monitorChannels = () => {
   (async () => {
     await CatalogService.findHighestIDUntilSuccessful(cookie);
 
-    while (true) {
+    while (!SettingsRepository.current.paused) {
       try {
         await CatalogService.fetchUntilCurrentAutomatic(cookie, handleItem);
       } catch (error) {
@@ -163,7 +163,7 @@ Logger.info('Starting monitoring channels');
 
 monitorChannels();
 
-if (discordConfig.channel_inactivity_enabled) {
+if (discordConfig.channelInactivityEnabled) {
   //every 30 minutes
   setInterval(() => {
     checkVintedChannelInactivity(client);

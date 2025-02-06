@@ -17,15 +17,15 @@ class ConfigurationManager {
    * @returns {Object} Discord configuration object.
    */
   static getDiscordConfig = {
-    client_id: process.env.DISCORD_CLIENT_ID,
+    clientId: process.env.DISCORD_CLIENT_ID,
     token: process.env.DISCORD_TOKEN,
-    role_admin_ids: process.env.DISCORD_ROLE_ADMIN_ID.split(','),
-    guild_id: process.env.DISCORD_GUILD_ID,
-    thread_channel_id: process.env.DISCORD_THREAD_CHANNEL_ID,
-    command_channel_id: process.env.DISCORD_COMMAND_CHANNEL_ID,
-    channel_inactivity_enabled: process.env.ENABLE_CHANNEL_INACTIVITY == 1 ? true : false,
-    channel_inactivity_hours: process.env.CHANNEL_INACTIVITY_HOURS,
-    channel_inactivity_delete_hours: process.env.CHANNEL_INACTIVITY_DELETE_HOURS,
+    adminRoleIds: process.env.DISCORD_ROLE_ADMIN_ID.split(','),
+    guildId: process.env.DISCORD_GUILD_ID,
+    threadChannelId: process.env.DISCORD_THREAD_CHANNEL_ID,
+    commandChannelId: process.env.DISCORD_COMMAND_CHANNEL_ID,
+    channelInactivityEnabled: process.env.ENABLE_CHANNEL_INACTIVITY == 1 ? true : false,
+    channelInactivityHours: process.env.CHANNEL_INACTIVITY_HOURS,
+    channelInactivityDeleteHours: process.env.CHANNEL_INACTIVITY_DELETE_HOURS,
   };
 
   /**
@@ -33,11 +33,11 @@ class ConfigurationManager {
    * @returns {Object} User configuration object.
    */
   static getUserConfig = {
-    max_private_channels_default: process.env.USER_MAX_PRIVATE_CHANNELS_DEFAULT,
+    defaultMaxPrivateChannels: process.env.USER_MAX_PRIVATE_CHANNELS_DEFAULT,
   };
 
   static getPermissionConfig = {
-    allow_user_to_create_private_channels: process.env.ALLOW_USER_TO_CREATE_PRIVATE_CHANNELS == 1 ? true : false
+    allowUserToCreatePrivateChannels: process.env.ALLOW_USER_TO_CREATE_PRIVATE_CHANNELS == 1 ? true : false
   };
 
   /**
@@ -45,10 +45,10 @@ class ConfigurationManager {
    * @returns {Object} Algorithm settings object.
    */
   static getAlgorithmSetting = {
-    vinted_api_domain_extension: process.env.VINTED_API_DOMAIN_EXTENSION,
-    filter_zero_stars_profiles: process.env.ALGORITHM_FILTER_ZERO_STARS_PROFILES == 1 ? true : false,
-    concurrent_requests: process.env.ALGORITHM_CONCURRENT_REQUESTS,
-    blacklisted_countries_codes: process.env.BLACKLISTED_COUNTRIES_CODES.split(',') || []
+    vintedApiDomainExtension: process.env.VINTED_API_DOMAIN_EXTENSION,
+    filterZeroStarsProfiles: process.env.ALGORITHM_FILTER_ZERO_STARS_PROFILES == 1 ? true : false,
+    concurrentRequests: process.env.ALGORITHM_CONCURRENT_REQUESTS,
+    blacklistedCountryCodes: process.env.BLACKLISTED_COUNTRIES_CODES.split(',') || []
   };
 
   /**
@@ -56,8 +56,8 @@ class ConfigurationManager {
    * @returns {Array} Array of proxy configurations.
    */
   static getProxiesConfig = {
-    use_webshare: process.env.USE_WEBSHARE == 1 ? true : false,
-    webshare_api_key: process.env.WEBSHARE_API_KEY,
+    useWebshare: process.env.USE_WEBSHARE == 1 ? true : false,
+    webshareApiKey: process.env.WEBSHARE_API_KEY,
   };
 
   static getDevMode = process.env.DEV_MODE === 1
