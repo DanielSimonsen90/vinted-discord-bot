@@ -4,7 +4,7 @@ import ConfigurationManager from './utils/config_manager.js';
 import Logger from './utils/logger.js';
 import crud from './crud.js';
 
-import createAndSubToPushes from './mikkel-resell/sub-to-pushes.js';
+import subToPushes from './mikkel-resell/sub-to-pushes.js';
 
 const client = new Client({
   intents: [
@@ -32,20 +32,21 @@ client.once('ready', async () => {
     }],
   });
 
-  createAndSubToPushes(client);
+  subToPushes(client);
+  
+  // Change presence to show number of channels being monitored
+  setInterval(async () => {
+    const channelCount = (crud.getAllVintedChannels()).length ?? 0;
+    client.user.setPresence({
+      activities: [{
+        name: `${channelCount} channels`,
+        type: ActivityType.Watching
+      }],
+      status: 'online'
+    });
+  }, 60000);
 });
 
-// Change presence to show number of channels being monitored
-setInterval(async () => {
-  const channelCount = (crud.getAllVintedChannels()).length ?? 0;
-  client.user.setPresence({
-    activities: [{
-      name: `${channelCount} channels`,
-      type: ActivityType.Watching
-    }],
-    status: 'online'
-  });
-}, 60000);
 
 client.on('interactionCreate', handleCommands);
 
