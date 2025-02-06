@@ -23,54 +23,50 @@ const errorStatusMap = {};
  * @returns {Promise<DetailedExecutionResultSuccess|DetailedExecutionResultError>} - An object containing the response status, code, and result or error message.
  */
 async function executeWithDetailedHandling(asyncFn, ...params) {
-    try {
-        if (typeof asyncFn !== 'function') {
-            throw new TypeError('asyncFn must be a function');
-        }
+  try {
+    if (typeof asyncFn !== 'function') throw new TypeError('asyncFn must be a function');
 
-        const result = await asyncFn(...params);
+    const result = await asyncFn(...params);
 
-        return { 
-            success: true,
-            code: 200, // HTTP status for OK
-            ...result
-        };
-    } catch (error) {
-        if (!error) {
-            throw new Error('An unknown error occurred');
-        }
+    return {
+      success: true,
+      code: 200, // HTTP status for OK
+      ...result
+    };
+  } catch (error) {
+    if (!error) throw new Error('An unknown error occurred');
 
-        // Determine the status code based on the type of error
-        const statusCode = determineStatusCode(error);
-        
-        return {
-            success: false,
-            code: statusCode,
-            error: error.message || 'An unknown error occurred'
-        };
-    }
+    // Determine the status code based on the type of error
+    const statusCode = determineStatusCode(error);
+
+    return {
+      success: false,
+      code: statusCode,
+      error: error.message || 'An unknown error occurred'
+    };
+  }
 }
 
 /**
  * Determines the HTTP status code based on the error type using a mapping object.
  */
 function determineStatusCode(error) {
-    return errorStatusMap[error.name] || 500; // Default to 500 if error name is not mapped
+  return errorStatusMap[error.name] ?? error.code ?? 500; // Default to 500 if error name is not mapped
 }
 
 /**
  * Factory function for creating custom Error classes with predefined names.
  */
 function createCustomError(name, defaultStatusCode) {
-    errorStatusMap[name] = defaultStatusCode
+  errorStatusMap[name] = defaultStatusCode;
 
-    return class extends Error {
-        constructor(message) {
-            super(message);
-            this.name = name;
-            this.statusCode = defaultStatusCode;
-        }
-    };
+  return class extends Error {
+    constructor(message) {
+      super(message);
+      this.name = name;
+      this.statusCode = defaultStatusCode;
+    }
+  };
 }
 
 // Custom error classes using the factory function
@@ -81,12 +77,12 @@ const BadRequestError = createCustomError("BadRequestError", 400);
 const RateLimitError = createCustomError("RateLimitError", 429);
 const SaveError = createCustomError("SaveError", 500);
 
-export { 
-    executeWithDetailedHandling, 
-    NotFoundError,
-    UnauthorizedError, 
-    ForbiddenError,
-    BadRequestError,
-    RateLimitError,
-    SaveError
+export {
+  executeWithDetailedHandling,
+  NotFoundError,
+  UnauthorizedError,
+  ForbiddenError,
+  BadRequestError,
+  RateLimitError,
+  SaveError
 };

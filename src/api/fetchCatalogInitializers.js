@@ -12,18 +12,15 @@ const extension = ConfigurationManager.getAlgorithmSetting.vinted_api_domain_ext
  * @returns {Promise<Object>} - Promise resolving to the fetched catalog categories
  */
 export async function fetchCatalogInitializer({ cookie }) {
-    return await executeWithDetailedHandling(async () => {
-        const url = `https://www.vinted.${extension}/api/v2/catalog/initializers`;
+  return await executeWithDetailedHandling(async () => {
+    const url = `https://www.vinted.${extension}/api/v2/catalog/initializers`;
 
-        const response = await RequestBuilder.get(url)
-            // .setNextProxy()
-            .setCookie(cookie)
-            .send();
+    const response = await RequestBuilder.get(url)
+      .setNextProxy()
+      .setCookie(cookie)
+      .send();
 
-        if (!response.success) {
-            throw new NotFoundError("Error fetching catalog items.");
-        }
-
-        return { data: response.data.dtos };
-    });
+    if (!response.success) throw new NotFoundError("Error fetching catalog items.");
+    return { data: response.data.dtos };
+  });
 }

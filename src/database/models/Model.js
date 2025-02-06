@@ -2,6 +2,11 @@ import Repository from '../repositories/Repository.js'
 
 export class Model {
   /**
+   * @type {string}
+   */
+  _id = undefined;
+
+  /**
  * @type {Record<string, typeof Repository | undefined>}
  */
   #relations = {};

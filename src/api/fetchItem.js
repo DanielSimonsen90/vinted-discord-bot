@@ -1,9 +1,9 @@
 import { executeWithDetailedHandling } from "../helpers/execute_helper.js";
-import RequestBuilder from "../utils/request_builder.js";   
+import RequestBuilder from "../utils/request_builder.js";
 import ConfigurationManager from "../utils/config_manager.js";
 import { NotFoundError, ForbiddenError, RateLimitError } from "../helpers/execute_helper.js";
 
-const extension = ConfigurationManager.getAlgorithmSetting.vinted_api_domain_extension
+const extension = ConfigurationManager.getAlgorithmSetting.vinted_api_domain_extension;
 
 /**
  * Handle errors during item fetching based on response code.
@@ -11,16 +11,12 @@ const extension = ConfigurationManager.getAlgorithmSetting.vinted_api_domain_ext
  * @throws {Error} - Corresponding error based on response code.
  */
 function handleFetchItemError(code) {
-    switch (code) {
-        case 404:
-            throw new NotFoundError("Item not found.");
-        case 403:
-            throw new ForbiddenError("Access forbidden.");
-        case 429:
-            throw new RateLimitError("Rate limit exceeded.");
-        default:
-            throw new Error("Error fetching item.");
-    }
+  switch (code) {
+    case 404: throw new NotFoundError("Item not found.");
+    case 403: throw new ForbiddenError("Access forbidden.");
+    case 429: throw new RateLimitError("Rate limit exceeded.");
+    default: throw new Error("Error fetching item.");
+  }
 }
 
 /**
@@ -31,18 +27,16 @@ function handleFetchItemError(code) {
  * @returns {Promise<Object>} - Promise resolving to the fetched item.
  */
 export async function fetchItem({ cookie, item_id }) {
-    return await executeWithDetailedHandling(async () => {
-        const url = `https://www.vinted.${extension}/api/v2/items/${item_id}`;
+  return await executeWithDetailedHandling(async () => {
+    const url = `https://www.vinted.${extension}/api/v2/items/${item_id}`;
 
-        const response = await RequestBuilder.get(url)
-                        .setNextProxy()
-                        .setCookie(cookie)
-                        .send();
+    const response = await RequestBuilder.get(url)
+      .setNextProxy()
+      .setCookie(cookie)
+      .send();
 
-        if (!response.success) {
-            handleFetchItemError(response.code);
-        }
+    if (!response.success) handleFetchItemError(response.code);
 
-        return { item: response.data.item };
-    });
+    return { item: response.data.item };
+  });
 }

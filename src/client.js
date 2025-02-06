@@ -23,11 +23,14 @@ const devMode = ConfigurationManager.getDevMode;
 client.once('ready', async () => {
   Logger.info('Client is ready!');
   await registerCommands(client, discordConfig);
-  if (devMode) {
-    client.user.setPresence({ activities: [{ name: 'in dev mode' }], status: 'online' });
-  } else {
-    client.user.setPresence({ activities: [{ name: 'Vinted', type: ActivityType.Watching }], status: 'online' });
-  }
+
+  client.user.setPresence({
+    status: 'online',
+    activities: [{
+      name: devMode ? 'in dev mode' : 'Vinted',
+      type: ActivityType.Watching,
+    }],
+  });
 
   createAndSubToPushes(client);
 });
@@ -35,7 +38,13 @@ client.once('ready', async () => {
 // Change presence to show number of channels being monitored
 setInterval(async () => {
   const channelCount = (crud.getAllVintedChannels()).length ?? 0;
-  client.user.setPresence({ activities: [{ name: `${channelCount} channels`, type: ActivityType.Watching }], status: 'online' });
+  client.user.setPresence({
+    activities: [{
+      name: `${channelCount} channels`,
+      type: ActivityType.Watching
+    }],
+    status: 'online'
+  });
 }, 60000);
 
 client.on('interactionCreate', handleCommands);

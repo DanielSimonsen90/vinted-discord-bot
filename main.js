@@ -12,104 +12,93 @@ import crud from "./src/crud.js";
 import Logger from "./src/utils/logger.js";
 import CatalogService from "./src/services/catalog_service.js";
 
-var cookie = null;
-
 try {
-    await ProxyManager.init();
+  await ProxyManager.init();
 } catch (error) {
-    Logger.error(`Failed to initialize proxies: ${error.message}`);
-    Logger.info('Continuing without proxies...');
+  Logger.error(`Failed to initialize proxies: ${error.message}`);
+  Logger.info('Continuing without proxies...');
 }
 
-const algorithmSettings = ConfigurationManager.getAlgorithmSetting
+const algorithmSettings = ConfigurationManager.getAlgorithmSetting;
 CatalogService.initializeConcurrency(algorithmSettings.concurrent_requests);
 
-const getCookie = async () => {
-    const c = await fetchCookie();
-    return c.cookie;
-};
-
+const getCookie = async () => (await fetchCookie()).cookie;
 const refreshCookie = async () => {
-    let found = false;
-    while (!found) {
-        try {
-            const cookie = await getCookie();
-            if (cookie) {
-                found = true;
-                Logger.info('Fetched cookie from Vinted');
-                return cookie;
-            }
-        } catch (error) {
-            Logger.debug('Error fetching cookie');
-            await new Promise(resolve => setTimeout(resolve, 200));
-        }
-
-        setTimeout(() => {
-            Logger.debug('Retrying to fetch cookie');
-        }, 1000);
+  let cookie;
+  while (!cookie) {
+    try {
+      cookie = await getCookie();
+      if (cookie) {
+        Logger.info('Fetched cookie from Vinted');
+        return cookie;
+      }
+    } catch (error) {
+      Logger.debug('Error fetching cookie');
+      await new Promise(resolve => setTimeout(resolve, 200));
     }
+
+    setTimeout(() => {
+      Logger.debug('Retrying to fetch cookie');
+    }, 1000);
+  }
 };
 
-
-const discordConfig = ConfigurationManager.getDiscordConfig
+const discordConfig = ConfigurationManager.getDiscordConfig;
 const token = discordConfig.token;
 
-Logger.info('Starting Vinted Bot');
 Logger.info('Fetching cookie from Vinted');
 
-cookie = await refreshCookie();
+var cookie = await refreshCookie();
 
 setInterval(async () => {
-    try {
-        cookie = await refreshCookie();
-    } catch (error) {
-        Logger.debug('Error refreshing cookie');
-    }
+  try {
+    cookie = await refreshCookie();
+  } catch (error) {
+    Logger.debug('Error refreshing cookie');
+  }
 }, 60000);  // 60 seconds
 
 Logger.info('Fetching catalog roots from Vinted');
 
 await (async function getCatalogRoots(cookie) {
-    let found = false;
-    while (!found) {
-        try {
-            const roots = await fetchCatalogInitializer( { cookie });
-            if (roots) {
-                buildCategoryMapFromRoots(roots);
-                found = true;
-                Logger.info('Fetched catalog roots from Vinted');
-            }
-        } catch (error) {
-            Logger.debug('Error fetching catalog roots');
-            console.error(error);
-            await new Promise(resolve => setTimeout(resolve, 200));
-        }
+  let roots;
+  while (!roots) {
+    try {
+      roots = await fetchCatalogInitializer({ cookie });
+      if (roots) {
+        buildCategoryMapFromRoots(roots);
+        Logger.info('Fetched catalog roots from Vinted');
+      }
+    } catch (error) {
+      Logger.debug('Error fetching catalog roots');
+      console.error(error);
+      await new Promise(resolve => setTimeout(resolve, 200));
     }
-})(cookie)
+  }
+})(cookie);
 
 const sendToChannel = async (item, user, vintedChannel) => {
-    // get the domain from the URL between vinted. and the next /
-    const domain = vintedChannel.url.match(/vinted\.(.*?)\//)[1];
-    const { embed, photosEmbeds } = await createVintedItemEmbed(item, domain);
-    const actionRow = await createVintedItemActionRow(item, domain);
+  // get the domain from the URL between vinted. and the next /
+  const domain = vintedChannel.url.match(/vinted\.(.*?)\//)[1];
+  const { embed, photosEmbeds } = await createVintedItemEmbed(item, domain);
+  const actionRow = await createVintedItemActionRow(item, domain);
 
-    const doMentionUser = user && vintedChannel.preferences.get(Preference.Mention);
-    const mentionString = doMentionUser ? `<@${user.discordId}>` : '';
+  const doMentionUser = user && vintedChannel.preferences.get(Preference.Mention);
+  const mentionString = doMentionUser ? `<@${user.discordId}>` : '';
 
-    try {
-        await postMessageToChannel(
-            token,
-            vintedChannel.channelId,
-            `${mentionString} `,
-            [embed, ...photosEmbeds],
-            [actionRow]
-        );
-    }
-    catch (error) {
-        Logger.debug('Error posting message to channel');
-        Logger.debug(error);
-    }
-
+  try {
+    await postMessageToChannel(
+      token,
+      vintedChannel.channelId,
+      `${mentionString} `,
+      [embed, ...photosEmbeds],
+      [actionRow]
+    );
+  }
+  catch (error) {
+    Logger.debug('Error posting message to channel');
+    Logger.debug(error);
+  }
 };
 
 Logger.info('Fetching monitored channels');
@@ -121,57 +110,53 @@ let allMonitoringChannelsBrandMap = await crud.getAllMonitoredVintedChannelsBran
 Logger.info(`Monitoring ${allMonitoringChannels.length} Vinted channels`);
 
 crud.eventEmitter.on('updated', async () => {
-    allMonitoringChannels = await crud.getAllMonitoredVintedChannels();
-    allMonitoringChannelsBrandMap = await crud.getAllMonitoredVintedChannelsBrandMap();
-    Logger.debug('Updated vinted channels');
+  allMonitoringChannels = await crud.getAllMonitoredVintedChannels();
+  allMonitoringChannelsBrandMap = await crud.getAllMonitoredVintedChannelsBrandMap();
+  Logger.debug('Updated vinted channels');
 });
 
 const monitorChannels = () => {
-    const handleItem = async (rawItem) => {
-        Logger.debug('Handling item');
-        const item = new VintedItem(rawItem);
+  const handleItem = async (rawItem) => {
+    Logger.debug('Handling item');
+    const item = new VintedItem(rawItem);
 
-        if (item.getNumericStars() === 0 && algorithmSettings.filter_zero_stars_profiles) {
-            return;
+    if (item.getNumericStars() === 0 && algorithmSettings.filter_zero_stars_profiles) return;
+
+    let rawItemBrandId = item.brandId;
+    rawItemBrandId = rawItemBrandId ? rawItemBrandId.toString() : null;
+
+    if (allMonitoringChannelsBrandMap.has(rawItemBrandId)) {
+      const brandChannels = allMonitoringChannelsBrandMap.get(rawItemBrandId);
+      for (const brandChannel of brandChannels) {
+        try {
+          const user = brandChannel.user;
+          const matchingItems = filterItemsByUrl(
+            [item],
+            brandChannel.url,
+            brandChannel.bannedKeywords,
+            brandChannel.preferences.get(Preference.Countries) || []
+          );
+
+          if (matchingItems.length > 0) sendToChannel(item, user, brandChannel);
+        } catch (error) {
+          Logger.debug('Error sending to channel');
+          Logger.debug(error);
         }
+      }
+    }
+  };
 
-        let rawItemBrandId = item.brandId;
-        rawItemBrandId = rawItemBrandId ? rawItemBrandId.toString() : null;
+  (async () => {
+    await CatalogService.findHighestIDUntilSuccessful(cookie);
 
-        if (allMonitoringChannelsBrandMap.has(rawItemBrandId)) {
-            const brandChannels = allMonitoringChannelsBrandMap.get(rawItemBrandId);
-            for (const brandChannel of brandChannels) {
-                try {
-                    const user = brandChannel.user;
-                    const matchingItems = filterItemsByUrl(
-                        [item], 
-                        brandChannel.url, 
-                        brandChannel.bannedKeywords, 
-                        brandChannel.preferences.get(Preference.Countries) || []
-                    );
-
-                    if (matchingItems.length > 0) {
-                        sendToChannel(item, user, brandChannel);
-                    }
-                } catch(error) {
-                    Logger.debug('Error sending to channel');
-                    Logger.debug(error);
-                }
-            }
-        }
-    };
-
-    (async () => {
-        await CatalogService.findHighestIDUntilSuccessful(cookie);
-
-        while (true) {
-            try {
-                await CatalogService.fetchUntilCurrentAutomatic(cookie, handleItem);
-            } catch (error) {
-                console.error(error);
-            }
-        }
-    })();
+    while (true) {
+      try {
+        await CatalogService.fetchUntilCurrentAutomatic(cookie, handleItem);
+      } catch (error) {
+        console.error(error);
+      }
+    }
+  })();
 };
 
 Logger.info('Starting monitoring channels');
@@ -179,8 +164,8 @@ Logger.info('Starting monitoring channels');
 monitorChannels();
 
 if (discordConfig.channel_inactivity_enabled) {
-    //every 30 minutes
-    setInterval(() => {
-        checkVintedChannelInactivity(client)
-    }, 1000 * 60 * 30);
+  //every 30 minutes
+  setInterval(() => {
+    checkVintedChannelInactivity(client);
+  }, 1000 * 60 * 30);
 }

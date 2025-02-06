@@ -34,62 +34,57 @@ export async function execute(interaction) {
     const discordId = interaction.options.getString('user_id') || interaction.user.id;
 
     let embed;
-    if (type === 'user') {
-      const user = await crud.getUserByDiscordId(discordId);
-      if (!user) {
-        await sendErrorEmbed(interaction, t(l, 'user-not-found'));
-        return;
-      }
 
-      embed = await createBaseEmbed(
-        interaction,
-        t(l, 'user-info'),
-        t(l, 'user-info-success'),
-        0x00FF00
-      );
+    switch (type) {
+      case 'user':
+        const user = await crud.getUserByDiscordId(discordId);
+        if (!user) return sendErrorEmbed(interaction, t(l, 'user-not-found'));
 
-      const userNumberOfChannels = user.channels.length;
+        embed = await createBaseEmbed(
+          interaction,
+          t(l, 'user-info'),
+          t(l, 'user-info-success'),
+          0x00FF00
+        );
 
-      embed.setFields([
-        { name: `${t(l, 'user-id')}`, value: `${user._id} ` },
-        { name: `${t(l, 'discord-id')}`, value: `${user.discordId} ` },
-        { name: `${t(l, 'max-channels')}`, value: `${userNumberOfChannels} / ${user.maxChannels} `, inline: true },
-        { name: `${t(l, 'country-whitelist')}`, value: `${user.preferences.get(Preference.Countries) || []} `, inline: true },
-        { name: `${t(l, 'user-mentions')}`, value: `${user.preferences.get(Preference.Mention) || false} `, inline: true }
-      ]);
+        const userNumberOfChannels = user.channels.length;
 
-    } else if (type === 'channel') {
-      if (!channelId) {
-        await sendErrorEmbed(interaction, t(l, 'channel-id-required'));
-        return;
-      }
+        embed.setFields([
+          { name: `${t(l, 'user-id')}`, value: `${user._id} ` },
+          { name: `${t(l, 'discord-id')}`, value: `${user.discordId} ` },
+          { name: `${t(l, 'max-channels')}`, value: `${userNumberOfChannels} / ${user.maxChannels} `, inline: true },
+          { name: `${t(l, 'country-whitelist')}`, value: `${user.preferences.get(Preference.Countries) || []} `, inline: true },
+          { name: `${t(l, 'user-mentions')}`, value: `${user.preferences.get(Preference.Mention) || false} `, inline: true }
+        ]);
+        break;
 
-      // Get the user
-      const channel = await crud.getVintedChannelById(channelId);
+      case 'channel':
+        if (!channelId) return sendErrorEmbed(interaction, t(l, 'channel-id-required'));
 
-      // Find the channel by id
-      if (!channel) {
-        await sendErrorEmbed(interaction, t(l, 'channel-not-found'));
-        return;
-      }
+        // Get the user
+        const channel = await crud.getVintedChannelById(channelId);
 
-      embed = await createBaseEmbed(
-        interaction,
-        t(l, 'channel-info'),
-        t(l, 'channel-info-success'),
-        0x00FF00
-      );
+        // Find the channel by id
+        if (!channel) return sendErrorEmbed(interaction, t(l, 'channel-not-found'));
 
-      embed.setFields([
-        { name: `${t(l, 'channel-id')}`, value: `${channel._id} ` },
-        { name: `${t(l, 'channel-discord-id')}`, value: `${channel.channelId} ` },
-        { name: `${t(l, 'name')}`, value: `${channel.name} `, inline: true },
-        { name: `${t(l, 'url')}`, value: `${channel.url} ` },
-        { name: `${t(l, 'monitoring')}`, value: `${channel.isMonitoring} `, inline: true },
-        { name: `${t(l, 'type')}`, value: `${channel.type} `, inline: true },
-        { name: `${t(l, 'country-whitelist')}`, value: `${channel.preferences.get(Preference.Countries) || []} `, inline: true },
-        { name: `${t(l, 'user-mentions')}`, value: `${channel.preferences.get(Preference.Mention) || false} `, inline: true }
-      ]);
+        embed = await createBaseEmbed(
+          interaction,
+          t(l, 'channel-info'),
+          t(l, 'channel-info-success'),
+          0x00FF00
+        );
+
+        embed.setFields([
+          { name: `${t(l, 'channel-id')}`, value: `${channel._id} ` },
+          { name: `${t(l, 'channel-discord-id')}`, value: `${channel.channelId} ` },
+          { name: `${t(l, 'name')}`, value: `${channel.name} `, inline: true },
+          { name: `${t(l, 'url')}`, value: `${channel.url} ` },
+          { name: `${t(l, 'monitoring')}`, value: `${channel.isMonitoring} `, inline: true },
+          { name: `${t(l, 'type')}`, value: `${channel.type} `, inline: true },
+          { name: `${t(l, 'country-whitelist')}`, value: `${channel.preferences.get(Preference.Countries) || []} `, inline: true },
+          { name: `${t(l, 'user-mentions')}`, value: `${channel.preferences.get(Preference.Mention) || false} `, inline: true }
+        ]);
+      default: break;
     }
 
     await interaction.editReply({ embeds: [embed] });
