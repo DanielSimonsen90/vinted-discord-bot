@@ -9,12 +9,10 @@ import EventEmitter from "./utils/event_emitter.js";
 import ConfigurationManager from "./utils/config_manager.js";
 
 const userDefaultConfig = ConfigurationManager.getUserConfig;
-const discordAdminId = ConfigurationManager.getDiscordConfig.role_admin_id;
-
+const discordAdminIds = ConfigurationManager.getDiscordConfig.adminRoleIds;
 const eventEmitter = new EventEmitter();
 
 /**
- * 
  * @param {import('discord.js').RepliableInteraction} interaction 
  * @param {string} messageContent 
  */
@@ -38,7 +36,7 @@ function sendErrorEmbed(interaction, messageContent) {
  * @returns {Promise<User>} - The created user.
  */
 async function createUser({ discordId, preferences = {}, channels = [], lastUpdated = new Date() }) {
-  const user = UserRepository.addOne({ discordId, preferences, channels, lastUpdated, maxChannels: userDefaultConfig.max_private_channels_default });
+  const user = UserRepository.addOne({ discordId, preferences, channels, lastUpdated, maxChannels: userDefaultConfig.defaultMaxPrivateChannels });
   UserRepository.save();
   eventEmitter.emit('updated');
 
@@ -46,28 +44,15 @@ async function createUser({ discordId, preferences = {}, channels = [], lastUpda
 }
 
 async function isUserAdmin(interaction) {
-  return await interaction.member.roles.cache.some(role => role.id === discordAdminId);
+  return interaction.member.roles.cache.some(role => discordAdminIds.includes(role.id));
 }
 
-async function isUserOwnerOfChannel(interaction, user_channels, channel_id, user_id = null) {
+async function isUserOwnerOfChannel(interaction, userChannels, channelId, userId = null) {
+  const user = await getUserById(userId);
+  const isUserAdmin = await isUserAdmin(interaction);
+  const isChannelOwner = userChannels.includes(channelId) || user?.channels.includes(channelId);
 
-  // get role admin id
-  if (await isUserAdmin(interaction)) {
-    return true;
-  }
-
-  if (user_channels.includes(channel_id)) {
-    return true;
-  }
-
-  if (user_id) {
-    const user = await getUserById(user_id);
-    if (user.channels.includes(channel_id)) {
-      return true;
-    }
-  }
-
-  return null;
+  return isUserAdmin || isChannelOwner;
 }
 
 /**
@@ -125,9 +110,8 @@ async function updateUser(id, { discordId, preferences, channels, lastUpdated, t
  */
 async function setUserMaxChannels(discordId, maxChannels) {
   const user = await getUserByDiscordId(discordId);
-  if (!user) {
-    throw new Error('User not found');
-  }
+  if (!user) throw new Error('User not found');
+
   user.maxChannels = maxChannels;
   const result = await user.save();
   eventEmitter.emit('updated');
@@ -187,11 +171,9 @@ async function addToPreferenceKey(repo, idKey, idValue, key, value) {
 
   if (entity && 'preferences' in entity) {
     const preference = entity.preferences.get(key);
-    if (preference) {
-      if (!preference.includes(value)) {
-        preference.push(value);
-        entity.preferences.set(key, preference);
-      }
+    if (preference?.includes(value)) {
+      preference.push(value);
+      entity.preferences.set(key, preference);
     } else {
       entity.preferences.set(key, [value]);
     }
@@ -238,57 +220,48 @@ async function removeFromPreferenceKey(repo, idKey, idValue, key, value) {
  * @param {string} discordId 
  * @param {string} key 
  * @param {any} value 
- * @returns 
  */
 async function setUserPreference(discordId, key, value) {
   const user = await getUserByDiscordId(discordId);
-  if (!user) {
-    await sendErrorEmbed(interaction, t(l, 'user-not-found'));
-    return;
-  }
 
-  return await setPreferenceKey(UserRepository, 'discordId', discordId, key, value);
+  return user
+    ? setPreferenceKey(UserRepository, 'discordId', discordId, key, value)
+    : sendErrorEmbed(interaction, t(l, 'user-not-found'));
 }
 
 async function addUserPreference(discordId, key, value) {
   const user = await getUserByDiscordId(discordId);
-  if (!user) {
-    await sendErrorEmbed(interaction, t(l, 'user-not-found'));
-    return;
-  }
 
-  return await addToPreferenceKey(UserRepository, 'discordId', discordId, key, value);
+  return user 
+    ? addToPreferenceKey(UserRepository, 'discordId', discordId, key, value)
+    : sendErrorEmbed(interaction, t(l, 'user-not-found'));
 }
 
 async function removeUserPreference(discordId, key, value) {
   const user = await getUserByDiscordId(discordId);
-  if (!user) {
-    await sendErrorEmbed(interaction, t(l, 'user-not-found'));
-    return;
-  }
 
-  return await removeFromPreferenceKey(UserRepository, 'discordId', discordId, key, value);
+  return user
+    ? removeFromPreferenceKey(UserRepository, 'discordId', discordId, key, value)
+    : sendErrorEmbed(interaction, t(l, 'user-not-found'));
 }
 
 // Wrapper functions for VintedChannel preferences
 
 async function setVintedChannelPreference(channelId, key, value) {
-  return await setPreferenceKey(VintedChannelRepository, 'channelId', channelId, key, value);
+  return setPreferenceKey(VintedChannelRepository, 'channelId', channelId, key, value);
 }
 
 async function addVintedChannelPreference(channelId, key, value) {
-  return await addToPreferenceKey(VintedChannelRepository, 'channelId', channelId, key, value);
+  return addToPreferenceKey(VintedChannelRepository, 'channelId', channelId, key, value);
 }
 
 async function removeVintedChannelPreference(channelId, key, value) {
-  return await removeFromPreferenceKey(VintedChannelRepository, 'channelId', channelId, key, value);
+  return removeFromPreferenceKey(VintedChannelRepository, 'channelId', channelId, key, value);
 }
 
 async function getVintedChannelPreference(channelId, key) {
   const channel = await getVintedChannelById(channelId);
-  if (channel) {
-    return channel.preferences.get(key);
-  }
+  return channel?.preferences.get(key);
 }
 
 async function setVintedChannelUpdatedAtNow(channelId) {
@@ -370,7 +343,7 @@ async function getAllPrivateVintedChannels() {
   return VintedChannelRepository.find({ type: 'private' })?.populate({
     property: 'user',
     repo: UserRepository
-  });
+  }) ?? [];
 }
 
 function parseVintedSearchParams(url) {
@@ -484,9 +457,7 @@ async function deleteVintedChannel(id) {
 
 async function deleteVintedChannelByChannelId(channelId) {
   const channel = VintedChannelRepository.findOne({ channelId: channelId });
-  if (channel) {
-    return await deleteVintedChannel(channel._id);
-  }
+  return channel ? deleteVintedChannel(channel._id) : undefined;
 }
 
 /**
@@ -523,10 +494,8 @@ async function addChannelToUser(userId, channelId) {
  */
 async function checkChannelInUser(userId, channelId) {
   const user = UserRepository.findById(userId);
-  if (user) {
-    return user.channels.includes(channelId);
-  }
-  eventEmitter.emit('updated');
+  if (user) return user.channels.includes(channelId);
+  eventEmitter.emit('updated'); // ?? what are we updating
 }
 
 /**
@@ -537,9 +506,9 @@ async function checkChannelInUser(userId, channelId) {
 async function removeChannelFromUser(userId, channelId) {
   const user = UserRepository.findById(userId);
   if (user) {
-    user.channels = user.channels.filter(c => 
-      typeof c === 'string' ? c !== channelId 
-      : typeof c === 'object' && 'id' in c ? c.id !== channelId 
+    user.channels = user.channels.filter(c =>
+      typeof c === 'string' ? c !== channelId
+      : typeof c === 'object' && 'id' in c ? c.id !== channelId
       : true
     );
 
@@ -552,9 +521,9 @@ async function removeChannelFromUser(userId, channelId) {
 async function removeChannelFromUserByIds(discordId, channelId) {
   const user = await getUserByDiscordId(discordId);
   if (user) {
-    user.channels = user.channels.filter(c => 
-      typeof c === 'string' ? c !== channelId 
-      : typeof c === 'object' && 'id' in c ? c.id !== channelId 
+    user.channels = user.channels.filter(c =>
+      typeof c === 'string' ? c !== channelId
+      : typeof c === 'object' && 'id' in c ? c.id !== channelId
       : true
     );
 
@@ -566,9 +535,7 @@ async function removeChannelFromUserByIds(discordId, channelId) {
 
 async function getUserFromChannel(channelId) {
   const channel = VintedChannelRepository.findOne({ channelId });
-  if (channel) {
-    return await getUserById(channel.user);
-  }
+  return channel ? getUserById(channel.user) : undefined;
 }
 
 // Export the CRUD operations and utility functions

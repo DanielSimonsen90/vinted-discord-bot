@@ -5,21 +5,25 @@ import Logger from '../utils/logger.js';
 import { isSubcategory } from '../database/index.js';
 import ConfigurationManager from '../utils/config_manager.js';
 
-const blacklisted_countries_codes = ConfigurationManager.getAlgorithmSetting.blacklisted_countries_codes;
+const blacklisted_countries_codes = ConfigurationManager.getAlgorithmSetting.blacklistedCountryCodes;
 
 function parseVintedSearchParams(url) {
   try {
     const searchParams = {};
     const params = new URL(url).searchParams;
-    const paramsKeys = ['search_text', 'order', 'catalog[]', 'brand_ids[]', 'video_game_platform_ids[]', 'size_ids[]', 'price_from', 'price_to', 'status_ids[]', 'material_ids[]', 'color_ids[]'];
+    const paramsKeys = [
+      'search_text', 'order', 'catalog[]',
+      'brand_ids[]', 'video_game_platform_ids[]',
+      'size_ids[]', 'price_from', 'price_to',
+      'status_ids[]', 'material_ids[]', 'color_ids[]'
+    ];
+
     for (const key of paramsKeys) {
       const isMultiple = key.endsWith('[]');
-      if (isMultiple) {
-        searchParams[key.replace('[]', '')] = params.getAll(key) || null;
-      } else {
-        searchParams[key] = params.get(key) || null;
-      }
+      if (isMultiple) searchParams[key.replace('[]', '')] = params.getAll(key) || null;
+      else searchParams[key] = params.get(key) || null;
     }
+
     return searchParams;
   } catch (error) {
     Logger.error("Invalid URL provided: ", error.message);
@@ -29,7 +33,6 @@ function parseVintedSearchParams(url) {
 
 /**
  * Checks if a Vinted item matches the given search parameters and country codes, using fuzzy search.
- *
  * @param {Object} item - The Vinted item to check.
  * @param {Object} searchParams - The search parameters to match against the item.
  * @param {Array} [countries_codes=[]] - The country codes to check against the item's user country code.
@@ -38,14 +41,9 @@ function parseVintedSearchParams(url) {
 function matchVintedItemToSearchParams(item, searchParams, bannedKeywords, countries_codes = []) {
 
   // Check blacklisted countries
-  if (blacklisted_countries_codes.includes(item.user.countryCode)) {
-    return false;
-  }
-
-  // Check country codes
-  if (countries_codes.length && !countries_codes.includes(item.user.countryCode)) {
-    return false;
-  }
+  const isBlacklistedCountry = blacklisted_countries_codes.includes(item.user.countryCode);
+  const isRegisteredCountry = countries_codes.length && countries_codes.includes(item.user.countryCode);
+  if (isBlacklistedCountry || !isRegisteredCountry) return false;
 
   const lowerCaseItem = {
     title: item.title.toLowerCase(),
@@ -53,13 +51,14 @@ function matchVintedItemToSearchParams(item, searchParams, bannedKeywords, count
     brand: item.brand.toLowerCase()
   };
 
-  // make sure the bannedKeywords is an array of lowercase strings
-  bannedKeywords = bannedKeywords.map(keyword => keyword.toLowerCase());
 
-  // check for banned keywords in the title and description
-  if (bannedKeywords.some(keyword => lowerCaseItem.title.includes(keyword) || lowerCaseItem.description.includes(keyword))) {
-    return false;
-  }
+  const titleOrDescriptionContainsBannedKeywords = bannedKeywords
+    .some(keyword => (
+      lowerCaseItem.title.includes(keyword.toLowerCase())
+      || lowerCaseItem.description.includes(keyword.toLowerCase())
+    ));
+
+  if (titleOrDescriptionContainsBannedKeywords) return false;
 
   // Fuzzy search options
   const fuseOptions = {
@@ -81,17 +80,11 @@ function matchVintedItemToSearchParams(item, searchParams, bannedKeywords, count
   }
 
   // Check catalog IDs
-  if (searchParams.catalog.length && !searchParams.catalog.some(catalogId => isSubcategory(catalogId, item.catalogId))) {
-    return false;
-  }
 
-  if (searchParams.price_from && item.priceNumeric < searchParams.price_from) {
-    return false;
-  }
-
-  if (searchParams.price_to && item.priceNumeric > searchParams.price_to) {
-    return false;
-  }
+  const checkOne = searchParams.catalog.length && !searchParams.catalog.some(catalogId => isSubcategory(catalogId, item.catalogId));
+  const checkTwo = searchParams.price_from && item.priceNumeric < searchParams.price_from;
+  const checkThree = searchParams.price_to && item.priceNumeric > searchParams.price_to;
+  if (checkOne || checkTwo || checkThree) return false;
 
   // Check other parameters
   const searchParamsMap = new Map([
@@ -105,15 +98,9 @@ function matchVintedItemToSearchParams(item, searchParams, bannedKeywords, count
 
   for (const [key, value] of searchParamsMap) {
     if (searchParams[key] !== undefined && searchParams[key] !== null) {
-      if (Array.isArray(searchParams[key])) {
-        if (searchParams[key].length > 0 && !searchParams[key].includes(value.toString())) {
-          return false;
-        }
-      } else {
-        if (searchParams[key] !== value.toString()) {
-          return false;
-        }
-      }
+      const checkOne = Array.isArray(searchParams[key]) && searchParams[key].length > 0 && !searchParams[key].includes(value.toString());
+      const checkTwo = searchParams[key] !== value.toString();
+      if (checkOne || checkTwo) return false;
     }
   }
 

@@ -2,6 +2,7 @@ import path from 'path';
 import fs from 'fs';
 
 import { ModelCollection } from '../models/ModelCollection.js';
+import { randomUUID } from 'crypto';
 // import RepositoryItem from './RepositoryItem.js';
 
 const DB_DIR = path.join(process.cwd(), "data");
@@ -92,6 +93,7 @@ export class Repository {
    * @param {TRepoItem} repoItem 
    */
   addOne(repoItem) {
+    repoItem._id = randomUUID();
     this.__cache.push(repoItem);
     return repoItem;
   }
