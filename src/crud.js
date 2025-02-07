@@ -36,11 +36,11 @@ export function sendErrorEmbed(interaction, messageContent) {
  * @returns {Promise<User>} - The created user.
  */
 export function createUser({ discordId, preferences = {}, channels = [], lastUpdated = new Date() }) {
-  const user = UserRepository.addOne(new User({ 
-    discordId, 
-    preferences, 
-    channels, 
-    lastUpdated, 
+  const user = UserRepository.addOne(new User({
+    discordId,
+    preferences,
+    channels,
+    lastUpdated,
     maxChannels: userDefaultConfig.defaultMaxPrivateChannels,
   }));
   UserRepository.save();
@@ -82,7 +82,7 @@ export async function getUserByDiscordId(discordId) {
   return UserRepository.findOne({ discordId })?.populate({
     property: 'channels',
     repo: VintedChannelRepository
-  }) ?? crud.createUser({ discordId });
+  }) ?? createUser({ discordId });
 }
 
 /**
@@ -170,8 +170,8 @@ export async function addToPreferenceKey(repo, idKey, idValue, key, value) {
     const preference = entity.preferences[key];
     if (preference?.includes(value)) {
       preference.push(value);
-    // entity.preferences.set(key, preference);
-    entity.preferences[key] = preference;
+      // entity.preferences.set(key, preference);
+      entity.preferences[key] = preference;
     } else {
       // entity.preferences.set(key, [preference]);
       entity.preferences[key] = [preference];
@@ -231,7 +231,7 @@ export async function setUserPreference(discordId, key, value) {
 export async function addUserPreference(discordId, key, value) {
   const user = await getUserByDiscordId(discordId);
 
-  return user 
+  return user
     ? addToPreferenceKey(UserRepository, 'discordId', discordId, key, value)
     : sendErrorEmbed(interaction, t(l, 'user-not-found'));
 }
@@ -260,7 +260,7 @@ export async function removeVintedChannelPreference(channelId, key, value) {
 
 export async function getVintedChannelPreference(channelId, key) {
   const channel = await getVintedChannelById(channelId);
-  return channel?.preferences.get(key);
+  return channel?.preferences[key];
 }
 
 export async function setVintedChannelUpdatedAtNow(channelId) {
@@ -327,7 +327,7 @@ export async function getAllVintedChannels() {
  * Get all private Vinted channels.
  * @returns {Array<SchemaCollection<VintedChannel>>} - The list of channels.
  */
-export async function getAllPrivateVintedChannels() {
+export function getAllPrivateVintedChannels() {
   return VintedChannelRepository.find({ type: 'private' })?.populate({
     property: 'user',
     repo: UserRepository
@@ -350,21 +350,18 @@ function parseVintedSearchParams(url) {
     return searchParams;
   } catch (error) {
     console.error("Invalid URL provided: ", error.message);
-    return null;
+    return {};
   }
 }
 
 export async function getAllMonitoredVintedChannels() {
-  let channels = VintedChannelRepository.find({ isMonitoring: true })?.populate({
+  return VintedChannelRepository.find({ isMonitoring: true })?.populate({
     property: 'user',
     repo: UserRepository
-  });
-
-  for (const channel of channels) {
+  }).map(channel => {
     channel.generated_filters = parseVintedSearchParams(channel.url);
-  }
-
-  return channels;
+    return channel;
+  });
 }
 
 export async function getAllMonitoredVintedChannelsBrandMap() {
@@ -372,7 +369,7 @@ export async function getAllMonitoredVintedChannelsBrandMap() {
   const brandMap = new Map();
 
   for (const channel of channels) {
-    const brands = channel.generated_filters["brand_ids"];
+    const brands = channel.generated_filters["brand_ids"] ?? [];
     for (const brand of brands) {
       if (!brandMap.has(brand)) {
         brandMap.set(brand, [channel]);
@@ -413,10 +410,10 @@ export async function updateVintedChannel(id, { channelId, lastUpdated, name, ur
  * @returns {Promise<VintedChannel>} - The updated channel.
  */
 export async function startVintedChannelMonitoring(id, url) {
-  const toUpdate = { isMonitoring: true, url };
-  const channel = VintedChannelRepository.findByIdAndUpdate(id, toUpdate, { new: true });
-  eventEmitter.emit('startMonitoring', channel);
+  const channel = VintedChannelRepository.findByIdAndUpdate(id, { isMonitoring: true, url }, { new: true });
+  eventEmitter.emit('startMonitoring', channel); // TODO: use this lol
   eventEmitter.emit('updated');
+  VintedChannelRepository.save();
   return channel;
 }
 
@@ -466,11 +463,11 @@ export async function checkVintedChannelExists(channelId) {
  */
 export async function addChannelToUser(userId, channelId) {
   const user = UserRepository.findById(userId);
-  if (user) {
-    user.channels.push(channelId);
-    UserRepository.findByIdAndUpdate(userId, user);
-    UserRepository.save();
-  }
+  if (!user) return console.warn(`Unable to add channel ${channelId} to user ${userId}, as user is not saved in repo`);
+
+  user.channels.push(channelId);
+  UserRepository.findByIdAndUpdate(userId, user);
+  UserRepository.save();
   eventEmitter.emit('updated');
 }
 
@@ -496,8 +493,8 @@ export async function removeChannelFromUser(userId, channelId) {
   if (user) {
     user.channels = user.channels.filter(c =>
       typeof c === 'string' ? c !== channelId
-      : typeof c === 'object' && 'id' in c ? c.id !== channelId
-      : true
+        : typeof c === 'object' && 'id' in c ? c.id !== channelId
+          : true
     );
 
     UserRepository.findByIdAndUpdate(user.id, user);
@@ -511,8 +508,8 @@ export async function removeChannelFromUserByIds(discordId, channelId) {
   if (user) {
     user.channels = user.channels.filter(c =>
       typeof c === 'string' ? c !== channelId
-      : typeof c === 'object' && 'id' in c ? c.id !== channelId
-      : true
+        : typeof c === 'object' && 'id' in c ? c.id !== channelId
+          : true
     );
 
     UserRepository.findByIdAndUpdate(user.id, user);

@@ -20,6 +20,7 @@ function buildCategoryMap(node, parentMap = {}) {
 
 // Build the category map starting from the root nodes
 export function buildCategoryMapFromRoots(roots) {
+  if (!('data' in roots)) return console.warn('Unable to build category map from roots, as roots are not resolved properly')
   roots.data.catalogs.forEach((root) => {
     buildCategoryMap(root, categoryMap);
   });

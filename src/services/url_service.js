@@ -43,7 +43,11 @@ function matchVintedItemToSearchParams(item, searchParams, bannedKeywords, count
   // Check blacklisted countries
   const isBlacklistedCountry = blacklisted_countries_codes.includes(item.user.countryCode);
   const isRegisteredCountry = countries_codes.length && countries_codes.includes(item.user.countryCode);
-  if (isBlacklistedCountry || !isRegisteredCountry) return false;
+  if (isBlacklistedCountry || !isRegisteredCountry) {
+    if (isBlacklistedCountry) console.log('UK');
+    else console.log('Unknown country code: ' + item.user.countryCode)
+    return false;
+  }
 
   const lowerCaseItem = {
     title: item.title.toLowerCase(),
@@ -99,7 +103,9 @@ function matchVintedItemToSearchParams(item, searchParams, bannedKeywords, count
   for (const [key, value] of searchParamsMap) {
     if (searchParams[key] !== undefined && searchParams[key] !== null) {
       const checkOne = Array.isArray(searchParams[key]) && searchParams[key].length > 0 && !searchParams[key].includes(value.toString());
-      const checkTwo = searchParams[key] !== value.toString();
+      const checkTwo = Array.isArray(searchParams[key]) 
+        ? searchParams[key].some(v => v !== value?.toString()) 
+        : searchParams[key] !== value?.toString();
       if (checkOne || checkTwo) return false;
     }
   }
@@ -113,4 +119,33 @@ export function filterItemsByUrl(items, url, bannedKeywords, countries_codes = [
   if (!searchParams) return [];
 
   return items.filter(item => matchVintedItemToSearchParams(item, searchParams, bannedKeywords, countries_codes));
+}
+
+// the base URL for monitoring Vinted products
+const VALID_BASE_URL = "catalog";
+
+// validate that the URL is a Vinted catalog URL with at least one query parameter
+export function validateUrl(url) {
+  if (!url) return "invalid-url";
+  
+  try {
+    // check if the route is the valid base URL
+    // https://www.vinted.fr/catalog?...
+    // split and find the catalog route
+    // split the / and find the last element and compare it to the VALID_BASE_URL
+    let route = new URL(url).pathname.split('/').pop();
+    if (route !== VALID_BASE_URL) return "invalid-url-with-example";
+
+    const urlObj = new URL(url);
+    const searchParams = urlObj.searchParams;
+    // check if the URL has at least one query parameter
+    if (searchParams.toString().length === 0) return "must-have-query-params";
+
+    // cehck if there is at least a brand_ids[] or video_game_platform_ids[] query parameter
+    if (!searchParams.has('brand_ids[]') && !searchParams.has('video_game_platform_ids[]')) return "must-have-brand-query-param";
+
+    return true;
+  } catch (error) {
+    return "invalid-url";
+  }
 }

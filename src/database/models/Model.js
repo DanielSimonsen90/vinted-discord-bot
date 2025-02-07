@@ -23,7 +23,7 @@ export class Model {
         ? this[property].map(repo.findById.bind(repo))
         : repo.findById(this[property]);
 
-      if (resolvedValue) {
+      if (Array.isArray(resolvedValue) ? resolvedValue.filter(Boolean).length : resolvedValue !== undefined) {
         this[property] = resolvedValue;
         this.#relations[property] = repo;
       }
