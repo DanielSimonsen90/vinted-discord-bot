@@ -1,9 +1,9 @@
-import { ActionRowBuilder, ChannelType, ButtonBuilder, ButtonStyle, Client } from 'discord.js';
+import { ActionRowBuilder, ChannelType, ButtonBuilder, ButtonStyle, Client, Guild } from 'discord.js';
 import ProxyManager from '../utils/proxy_manager.js';
 import { ForbiddenError, NotFoundError } from '../helpers/execute_helper.js';
 import axios from 'axios';
 import Logger from '../utils/logger.js';
-import crud from '../crud.js';
+import * as crud from '../crud.js';
 import ConfigurationManager from '../utils/config_manager.js';
 import { createBaseEmbed } from '../bot/components/base_embeds.js';
 import t from '../t.js';
@@ -26,31 +26,27 @@ export async function createCategoryIfNotExists(channelManager, categoryName) {
     });
 }
 
-export async function createPrivateThread(
-  category,
-  threadName,
-  discordId = null,
-) {
+/**
+ * @param {Guild} guild 
+ * @param {string} threadName 
+ * @param {import('discord.js').Snowflake} discordId 
+ */
+export async function createPrivateThread(guild, threadName, discordId) {
+  if (!threadChannelId) throw new Error("Thread channel id not set in env.");
+  
   // Get the channel in which to create the thread
-  const channel = await category.guild.channels.fetch(threadChannelId);
-  if (!channel) throw new Error("Le channel spécifié est introuvable.");
+  const channel = await guild.channels.fetch(threadChannelId);
+  if (!channel || !('threads' in channel)) throw new Error("Channel not found.");
 
-  // Create the thread
+  /** @type {import('discord.js').PrivateThreadChannel} */
   const thread = await channel.threads.create({
     name: threadName,
     type: ChannelType.PrivateThread,
-    reason: "...",
+    reason: `Generated private thread for ${guild.client.users.cache.get(discordId)?.username ?? 'server member'}`,
   });
 
   // if the user is specified, add them to the thread
-  if (discordId) {
-    try {
-      const member = await category.guild.members.fetch(discordId);
-      await thread.members.add(member.id);
-    } catch (error) {
-      console.error("Erreur lors de l'ajout du membre au fil :", error);
-    }
-  }
+  await thread.members.add(discordId);
 
   return thread;
 }
@@ -174,7 +170,7 @@ export async function postMessageToChannel(
   Logger.debug(`Posting message to channel ${channelId}`);
   for (let attempt = 0; attempt <= retries; attempt++) {
     try {
-      const proxy = await ProxyManager.getNewProxy();
+      const proxy = ProxyManager.getNewProxy();
       const agent = ProxyManager.getProxyAgent(proxy);
 
       const options = {

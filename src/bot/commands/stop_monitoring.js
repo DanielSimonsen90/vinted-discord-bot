@@ -1,6 +1,6 @@
 import { SlashCommandBuilder } from 'discord.js';
 import { createBaseEmbed, sendErrorEmbed, sendWaitingEmbed } from '../components/base_embeds.js';
-import crud from '../../crud.js';
+import * as crud from '../../crud.js';
 import t from '../../t.js';
 import Logger from '../../utils/logger.js';
 
@@ -32,7 +32,7 @@ export async function execute(interaction) {
     );
 
     // Update the VintedChannel and set isMonitoring to false
-    await crud.stopVintedChannelMonitoring(vintedChannel._id);
+    await crud.stopVintedChannelMonitoring(vintedChannel.id);
     await crud.setVintedChannelUpdatedAtNow(channelId);
     await interaction.editReply({ embeds: [embed] });
   } catch (error) {

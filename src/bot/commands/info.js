@@ -1,6 +1,6 @@
 import { SlashCommandBuilder } from 'discord.js';
 import { createBaseEmbed, sendErrorEmbed, sendWaitingEmbed } from '../components/base_embeds.js';
-import crud from '../../crud.js';
+import * as crud from '../../crud.js';
 import t from '../../t.js';
 import { Preference } from '../../database/index.js';
 
@@ -50,7 +50,7 @@ export async function execute(interaction) {
         const userNumberOfChannels = user.channels.length;
 
         embed.setFields([
-          { name: `${t(l, 'user-id')}`, value: `${user._id} ` },
+          { name: `${t(l, 'user-id')}`, value: `${user.id} ` },
           { name: `${t(l, 'discord-id')}`, value: `${user.discordId} ` },
           { name: `${t(l, 'max-channels')}`, value: `${userNumberOfChannels} / ${user.maxChannels} `, inline: true },
           { name: `${t(l, 'country-whitelist')}`, value: `${user.preferences.get(Preference.Countries) || []} `, inline: true },
@@ -75,7 +75,7 @@ export async function execute(interaction) {
         );
 
         embed.setFields([
-          { name: `${t(l, 'channel-id')}`, value: `${channel._id} ` },
+          { name: `${t(l, 'channel-id')}`, value: `${channel.id} ` },
           { name: `${t(l, 'channel-discord-id')}`, value: `${channel.channelId} ` },
           { name: `${t(l, 'name')}`, value: `${channel.name} `, inline: true },
           { name: `${t(l, 'url')}`, value: `${channel.url} ` },

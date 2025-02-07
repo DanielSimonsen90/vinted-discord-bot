@@ -1,6 +1,6 @@
 import { SlashCommandBuilder, ChannelType } from 'discord.js';
 import { createBaseEmbed, sendErrorEmbed, sendWaitingEmbed } from '../components/base_embeds.js';
-import crud from '../../crud.js';
+import * as crud from '../../crud.js';
 import { createPrivateThread } from '../../services/discord_service.js';
 import t from '../../t.js';
 import ConfigurationManager from '../../utils/config_manager.js';
@@ -38,25 +38,22 @@ export async function execute(interaction) {
       return sendErrorEmbed(interaction, t(l, 'channel-limit-exceeded', { limit: user.maxChannels }));
     }
 
-    // Find or create an appropriate category
-    let category = await findOrCreateCategory(interaction.guild.channels, BASE_CATEGORY_NAME);
-
     // Create the private channel
-    const privateChannel = await createPrivateThread(category, channelName, discordId);
+    const privateChannel = await createPrivateThread(interaction.guild, channelName, discordId);
 
     // Create the VintedChannel
     const channelId = privateChannel.id;
-    const vintedChannel = await crud.createVintedChannel({
+    const vintedChannel = crud.createVintedChannel({
       channelId,
       name: channelName,
       isMonitoring: false,
       type: 'private',
-      user: user._id,
+      user: user.id,
       preferences: user.preferences
     });
 
     // Associate the channel with the user
-    await crud.addChannelToUser(user._id, vintedChannel._id);
+    await crud.addChannelToUser(user.id, vintedChannel.id);
 
     const embed = await createBaseEmbed(
       interaction,

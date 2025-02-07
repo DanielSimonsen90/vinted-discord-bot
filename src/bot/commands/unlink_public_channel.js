@@ -1,6 +1,6 @@
 import { SlashCommandBuilder } from 'discord.js';
 import { createBaseEmbed, sendErrorEmbed, sendWaitingEmbed } from '../components/base_embeds.js';
-import crud from '../../crud.js';
+import * as crud from '../../crud.js';
 
 export const data = new SlashCommandBuilder()
   .setName('unlink_public_channel')
@@ -20,7 +20,7 @@ export async function execute(interaction) {
     if (!vintedChannel || vintedChannel.type !== 'public') return sendErrorEmbed(interaction, 'Public channel not found.');
 
     // Delete the VintedChannel from the database
-    await crud.deleteVintedChannel(vintedChannel._id);
+    await crud.deleteVintedChannel(vintedChannel.id);
 
     const embed = await createBaseEmbed(
       interaction,

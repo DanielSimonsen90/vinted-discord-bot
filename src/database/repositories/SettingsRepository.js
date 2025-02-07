@@ -32,5 +32,5 @@ class SettingsRepository extends Repository {
   }
 }
 
-export const instance = new SettingsRepository("settingss", Settings);
+export const instance = new SettingsRepository("settings", Settings);
 export default instance;

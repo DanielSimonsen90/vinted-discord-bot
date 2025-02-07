@@ -15,7 +15,7 @@ export class User extends Model {
    * @param {string[]} channels
    * @param {Date} lastUpdated
    * @param {number} maxChannels
-   * @param {Map<string, any>} preferences
+   * @param {Record<string, any>} preferences
    */
   constructor({
     discordId, lastUpdated,
@@ -25,6 +25,7 @@ export class User extends Model {
   }) {
     super();
     this.discordId = discordId;
+    this.id = discordId;
     this.channels = channels;
     this.lastUpdated = lastUpdated;
     this.maxChannels = maxChannels;

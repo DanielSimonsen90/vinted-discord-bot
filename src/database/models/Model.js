@@ -4,7 +4,7 @@ export class Model {
   /**
    * @type {string}
    */
-  _id = undefined;
+  id = undefined;
 
   /**
  * @type {Record<string, typeof Repository | undefined>}
@@ -19,9 +19,12 @@ export class Model {
    */
   populate(...data) {
     for (const { property, repo } of data) {
-      const newValue = repo.findById(this[property]);
-      if (newValue) {
-        this[property] = newValue;
+      const resolvedValue = Array.isArray(this[property])
+        ? this[property].map(repo.findById.bind(repo))
+        : repo.findById(this[property]);
+
+      if (resolvedValue) {
+        this[property] = resolvedValue;
         this.#relations[property] = repo;
       }
     }
@@ -30,8 +33,7 @@ export class Model {
   }
 
   /**
-   * 
-   * @param {keyof { [key in keyof this as this[key] extends ((...args: any[]) => any) ? never : key]: this[key] }} property 
+   * @param {keyof { [key in keyof this as this[key] extends ((...args: any[]) => any) ? never : key]?: this[key] }} property 
    */
   markModified(property) {
     const ExternalRepo = this.#relations[property];
@@ -50,7 +52,6 @@ export class Model {
     }
 
     return result;
-    // return JSON.stringify(result);
   }
 }
 

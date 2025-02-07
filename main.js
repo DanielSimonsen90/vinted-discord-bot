@@ -1,16 +1,20 @@
-import ProxyManager from "./src/utils/proxy_manager.js";
-import { VintedItem } from "./src/entities/vinted_item.js";
-import { filterItemsByUrl } from "./src/services/url_service.js";
-import { Preference, SettingsRepository, buildCategoryMapFromRoots } from "./src/database/index.js";
-import client from "./src/client.js";
-import ConfigurationManager from "./src/utils/config_manager.js";
-import { postMessageToChannel, checkVintedChannelInactivity } from "./src/services/discord_service.js";
-import { createVintedItemEmbed, createVintedItemActionRow } from "./src/bot/components/item_embed.js";
 import { fetchCookie } from "./src/api/fetchCookie.js";
 import { fetchCatalogInitializer } from "./src/api/fetchCatalogInitializers.js";
-import crud from "./src/crud.js";
+import { Preference, SettingsRepository, buildCategoryMapFromRoots } from "./src/database/index.js";
+
+import ProxyManager from "./src/utils/proxy_manager.js";
+import ConfigurationManager from "./src/utils/config_manager.js";
 import Logger from "./src/utils/logger.js";
+
+import * as crud from "./src/crud.js";
+import { VintedItem } from "./src/entities/vinted_item.js";
+
+import { filterItemsByUrl } from "./src/services/url_service.js";
+import { postMessageToChannel, checkVintedChannelInactivity } from "./src/services/discord_service.js";
 import CatalogService from "./src/services/catalog_service.js";
+
+import client from "./src/client.js";
+import { createVintedItemEmbed, createVintedItemActionRow } from "./src/bot/components/item_embed.js";
 
 try {
   await ProxyManager.init();

@@ -2,7 +2,7 @@ import { IntentsBitField, Client, GatewayIntentBits, ActivityType } from 'discor
 import { registerCommands, handleCommands } from './bot/commands_handler.js';
 import ConfigurationManager from './utils/config_manager.js';
 import Logger from './utils/logger.js';
-import crud from './crud.js';
+import * as crud from './crud.js';
 
 import subToPushes from './mikkel-resell/sub-to-pushes.js';
 
@@ -36,7 +36,7 @@ client.once('ready', async () => {
   
   // Change presence to show number of channels being monitored
   setInterval(async () => {
-    const channelCount = (crud.getAllVintedChannels()).length ?? 0;
+    const channelCount = crud.getAllVintedChannels().length ?? 0;
     client.user.setPresence({
       activities: [{
         name: `${channelCount} channels`,

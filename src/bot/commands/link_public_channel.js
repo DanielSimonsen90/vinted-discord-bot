@@ -1,6 +1,6 @@
 import { SlashCommandBuilder } from 'discord.js';
 import { createBaseEmbed, sendErrorEmbed, sendWaitingEmbed } from '../components/base_embeds.js';
-import crud from '../../crud.js';
+import * as crud from '../../crud.js';
 
 export const data = new SlashCommandBuilder()
   .setName('link_public_channel')
