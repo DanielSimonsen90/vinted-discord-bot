@@ -1,6 +1,6 @@
 import { SlashCommandBuilder } from 'discord.js';
 import { createBaseEmbed, sendErrorEmbed, sendWaitingEmbed } from '../components/base_embeds.js';
-import crud from '../../crud.js';
+import * as crud from '../../crud.js';
 import t from '../../t.js';
 
 export const data = new SlashCommandBuilder()
@@ -38,7 +38,7 @@ export async function execute(interaction) {
     );
 
     embed.setFields([
-      { name: `${t(l, 'user-id')}`, value: `${user._id} ` },
+      { name: `${t(l, 'user-id')}`, value: `${user.id} ` },
       { name: `${t(l, 'discord-id')}`, value: `${user.discordId} ` },
       { name: `${t(l, 'max-channels')}`, value: `${user.maxChannels} `, inline: true },
     ]);

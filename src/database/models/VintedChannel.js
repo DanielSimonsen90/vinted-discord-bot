@@ -24,7 +24,7 @@ export class VintedChannel extends Model {
    * @param {boolean} isMonitoring
    * @param {string} type
    * @param {string} user
-   * @param {Map<string, Array<any>>} preferences
+   * @param {Record<string, Array<any>>} preferences
    */
   constructor({
     channelId, lastUpdated, keepMessageSent, 
@@ -34,6 +34,7 @@ export class VintedChannel extends Model {
     super();
 
     this.channelId = channelId;
+    this.id = channelId;
     this.lastUpdated = lastUpdated;
     this.keepMessageSent = keepMessageSent;
     this.name = name;

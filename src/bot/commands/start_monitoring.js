@@ -1,6 +1,6 @@
 import { SlashCommandBuilder } from 'discord.js';
 import { createBaseEmbed, sendErrorEmbed, sendWaitingEmbed, sendWarningEmbed } from '../components/base_embeds.js';
-import crud from '../../crud.js';
+import * as crud from '../../crud.js';
 import t from '../../t.js';
 import Logger from '../../utils/logger.js';
 import { Preference, ShippableMap } from '../../database/index.js';
@@ -80,7 +80,7 @@ export async function execute(interaction) {
     if (!user) return sendErrorEmbed(interaction, t(l, 'user-not-found'));
 
     // Find the VintedChannel by channelId and ensure it's owned by the user
-    const vintedChannel = user.channels.find(channel => channel.channelId === channelId && channel.user.equals(user._id));
+    const vintedChannel = user.channels.find(channel => channel.channelId === channelId && channel.user === user.id);
     if (!vintedChannel) return sendErrorEmbed(interaction, t(l, 'channel-not-found-nor-owned'));
 
     // Check if URL is provided or present in the VintedChannel
@@ -105,7 +105,7 @@ export async function execute(interaction) {
     await crud.setVintedChannelBannedKeywords(channelId, bannedKeywords);
 
     // Update the VintedChannel with the provided URL (if any) and set isMonitoring to true
-    await crud.startVintedChannelMonitoring(vintedChannel._id, url);
+    await crud.startVintedChannelMonitoring(vintedChannel.id, url);
   } catch (error) {
     console.error('Error starting monitoring session:', error);
     await sendErrorEmbed(interaction, 'There was an error starting the monitoring session.');

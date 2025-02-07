@@ -1,9 +1,9 @@
 import path from 'path';
 import fs from 'fs';
+import { randomUUID } from 'crypto';
 
 import { ModelCollection } from '../models/ModelCollection.js';
-import { randomUUID } from 'crypto';
-// import RepositoryItem from './RepositoryItem.js';
+import Model from '../models/Model.js';
 
 const DB_DIR = path.join(process.cwd(), "data");
 
@@ -47,13 +47,13 @@ export class Repository {
    * @param {string} id 
    * @param {TRepoItem} update 
    */
-  findByIdAndUpdate(id, update, options) {
+  findByIdAndUpdate(id, update, options = {}) {
     const forceAdd = 'new' in options && Boolean(options.new);
     let index = this.__cache.findIndex(entry => entry.id === id);
     if (index === -1 && !forceAdd) return null;
     else if (index === -1 && forceAdd) return this.__cache[this.__cache.push(update) - 1];
     
-    this.__cache[index] = { ...this.__cache[index], ...update };
+    for (const key in update) this.__cache[index][key] = update[key];
     return this.__cache[index];
   }
 
@@ -93,7 +93,9 @@ export class Repository {
    * @param {TRepoItem} repoItem 
    */
   addOne(repoItem) {
-    repoItem._id = randomUUID();
+    if (!(repoItem instanceof Model)) throw new Error("Invalid RepositoryItem");
+    if (!repoItem.id) repoItem.id = randomUUID();
+    
     this.__cache.push(repoItem);
     return repoItem;
   }
@@ -115,7 +117,7 @@ export class Repository {
   /**
    * @type {Array<TRepoItem>}
    */
-  __cache = undefined;
+  __cache = [];
 
   /**
   * @param {string} fileName 
@@ -127,12 +129,18 @@ export class Repository {
     
     if (!fs.existsSync(DB_DIR)) fs.mkdirSync(DB_DIR);
     if (!fs.existsSync(path.join(DB_DIR, fileName))
-      || !fs.statSync(path.join(DB_DIR, fileName)).isFile()) {
+      || !fs.statSync(path.join(DB_DIR, fileName)).isFile()
+    ) {
       fs.writeFileSync(path.join(DB_DIR, fileName), "[]");
     }
 
     const collection = JSON.parse(fs.readFileSync(path.join(DB_DIR, fileName), 'utf8'));
-    return collection.map(entry => new RepoItem(entry));
+    // return collection.map(entry => {
+    //   const item = new RepoItem(entry);
+    //   item.id = entry.id;
+    //   return item;
+    // });
+    return collection.map(entry => Object.assign(new RepoItem(entry), entry));
   }
   save() {
     fs.writeFileSync(path.join(DB_DIR, this.fileName + ".json"), JSON.stringify(this.__cache, null, 2));
