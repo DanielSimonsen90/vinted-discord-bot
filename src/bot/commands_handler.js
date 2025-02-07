@@ -1,5 +1,5 @@
 import { REST } from '@discordjs/rest';
-import { Routes } from 'discord.js';
+import { ContextMenuCommandBuilder, Routes, SlashCommandBuilder } from 'discord.js';
 import fs from 'fs';
 import path from 'path';
 import { fileURLToPath } from 'url';
@@ -7,28 +7,47 @@ import Logger from '../utils/logger.js';
 import ConfigurationManager from '../utils/config_manager.js';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
+const { commandChannelId, token, clientId, guildId } = ConfigurationManager.getDiscordConfig;
 
 const commands = [];
-const commandFiles = fs.readdirSync(path.join(__dirname, 'commands')).filter(file => file.endsWith('.js'));
-const commandChannelId = ConfigurationManager.getDiscordConfig.commandChannelId;
 
 // Using dynamic imports to load command modules
 async function loadCommands() {
-  for (const file of commandFiles) {
-    const module = await import(`./commands/${file}`);
-    commands.push(module.data.toJSON());
+  await loadDirectory('./commands');
+
+  async function loadDirectory(dir) {
+    const commandFiles = fs.readdirSync(path.join(__dirname, dir));
+    
+    for (const file of commandFiles) {
+      const filePath = path.join(dir, file);
+  
+      if (file.endsWith('.js')) {
+        const relativeFilePath = `./${filePath.replaceAll('\\', '/')}`;
+        const module = (await import(relativeFilePath)).default;
+        if (file.includes('__')) module.subcommand = true;
+        commands.push(module);
+      } else if (fs.lstatSync(path.join(__dirname, filePath)).isDirectory()) {
+        await loadDirectory(filePath);
+      } else {
+        console.warn(`Unknown file: ${path.join(dir, file)}`);
+      }
+    }
   }
+
 }
 
-export async function registerCommands(client, discordConfig) {
+export async function registerCommands() {
   await loadCommands();  // Ensure all commands are loaded before registering
 
-  const rest = new REST({ version: '9' }).setToken(discordConfig.token);
+  const rest = new REST({ version: '10' }).setToken(token);
   try {
     Logger.info('Started refreshing application (/) commands.');
     await rest.put(
-      Routes.applicationCommands(discordConfig.clientId),
-      { body: commands }
+      Routes.applicationGuildCommands(clientId, guildId), { 
+        body: commands
+          .filter(cmd => !cmd.subcommand)
+          .map(cmd => cmd.data.toJSON()) 
+      }
     );
     Logger.info('Successfully reloaded application (/) commands.');
   } catch (error) {
@@ -53,8 +72,8 @@ export async function handleCommands(interaction) {
   }
 
   try {
-    const module = await import(`./commands/${interaction.commandName}.js`);
-    await module.execute(interaction);
+    const command = commands.find(cmd => cmd.data.name === interaction.commandName);
+    await command.execute(interaction);
   } catch (error) {
     Logger.error('Error handling command:', error);
 

@@ -349,7 +349,7 @@ function parseVintedSearchParams(url) {
     }
     return searchParams;
   } catch (error) {
-    Logger.error("Invalid URL provided: ", error.message);
+    console.error("Invalid URL provided: ", error.message);
     return null;
   }
 }
