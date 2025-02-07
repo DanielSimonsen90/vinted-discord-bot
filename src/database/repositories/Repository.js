@@ -146,6 +146,12 @@ export class Repository {
     fs.writeFileSync(path.join(DB_DIR, this.fileName + ".json"), JSON.stringify(this.__cache, null, 2));
     return this;
   }
+
+  drop() {
+    this.__cache = [];
+    this.save();
+    return this;
+  }
   // #endregion
 }
 

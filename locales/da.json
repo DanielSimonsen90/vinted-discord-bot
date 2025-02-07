@@ -79,5 +79,8 @@
   "pause-paused": "Pauset",
   "pause-resumed": "Genoptaget",
   "pause-start": "Start",
-  "pause-end": "Slut"
+  "pause-end": "Slut",
+
+  "drop-data_not-allowed": "Du har ikke rettighed til at fjerne vintedbots gemte data.",
+  "drop-data_success": "vintedbot data er blevet slettet."
 }

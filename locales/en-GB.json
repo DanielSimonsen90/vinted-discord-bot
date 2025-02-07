@@ -108,5 +108,8 @@
     "pause-paused": "Paused",
     "pause-resumed": "Resumed",
     "pause-start": "Start",
-    "pause-end": "End"
+    "pause-end": "End",
+
+    "drop-data_not-allowed": "You are not allowed to drop vintedbots saved data.",
+    "drop-data_success": "vintedbot data has been dropped."
 }
