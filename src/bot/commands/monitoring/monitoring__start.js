@@ -3,9 +3,7 @@ import { createBaseEmbed, sendErrorEmbed, sendWaitingEmbed, sendWarningEmbed } f
 import * as crud from '../../../crud.js';
 import t from '../../../t.js';
 import { Preference, ShippableMap } from '../../../database/index.js';
-
-// the base URL for monitoring Vinted products
-const VALID_BASE_URL = "catalog";
+import { validateUrl, urlContainsSearchTextParameter, getDomainInUrl } from "../../../services/url_service.js";
 
 export default {
   data: new SlashCommandSubcommandBuilder()
@@ -69,46 +67,7 @@ export default {
       await crud.startVintedChannelMonitoring(vintedChannel.id, url);
     } catch (error) {
       console.error('Error starting monitoring session:', error);
-      await sendErrorEmbed(interaction, 'There was an error starting the monitoring session.');
+      await sendErrorEmbed(interaction, t(l, 'monitoring-start-error', { error }));
     }
   }
-}
-
-// validate that the URL is a Vinted catalog URL with at least one query parameter
-function validateUrl(url) {
-  try {
-    // check if the route is the valid base URL
-    // https://www.vinted.fr/catalog?...
-    // split and find the catalog route
-    // split the / and find the last element and compare it to the VALID_BASE_URL
-    let route = new URL(url).pathname.split('/').pop();
-    if (route !== VALID_BASE_URL) return "invalid-url-with-example";
-
-    const urlObj = new URL(url);
-    const searchParams = urlObj.searchParams;
-    // check if the URL has at least one query parameter
-    if (searchParams.toString().length === 0) return "must-have-query-params";
-
-    // cehck if there is at least a brand_ids[] or video_game_platform_ids[] query parameter
-    if (!searchParams.has('brand_ids[]') && !searchParams.has('video_game_platform_ids[]')) return "must-have-brand-query-param";
-
-    return true;
-  } catch (error) {
-    return "invalid-url";
-  }
-}
-
-function urlContainsSearchTextParameter(url) {
-  return new URL(url).searchParams.has('search_text');
-}
-
-// get .fr or other domain from the URL
-function getDomainInUrl(url) {
-  const urlObj = new URL(url);
-  let domain = urlObj.hostname.split('.').pop();
-
-  // handle .co.uk and other domains get only uk
-  if (domain === 'co') domain = urlObj.hostname.split('.').slice(-2)[0];
-
-  return domain;
 }

@@ -1,107 +1,132 @@
 {
+    "name": "Name",
+    "type": "Type",
+    "price": "Price",
+    "size": "Size",
+    "brand": "Brand",
+    "country": "Country",
+    "user-rating": "User rating",
+    "condition": "Condition",
+    "updated": "Updated",
+    "view-on-vinted": "View on Vinted",
+    "send-message": "Send message",
+    "buy": "Buy",
+
     "enabled": "Enabled",
     "disabled": "Disabled",
 
     "error": "Error",
-    "please-wait": "Please wait...",
+    "not-authorized": "Not authorized. Please contact the administrator.",
     "not-found": "Not found.",
+    "please-wait": "Please wait...",
     "warning": "Warning",
 
-    "url-contains-search-text": "URL contains search_text parameter, the results may not be accurate or incomplete. Avoid using this parameter if possible to get the best results.",
-
-    "name": "Name",
-
     "url": "URL",
-
     "invalid-url": "Invalid URL.",
-    "invalid-url-with-example": "Please provide an url in this format: eg. https://www.vinted.co.uk/catalog?...",
-    "must-have-query-params": "URL must have query parameters.",
-
-    "user": "User",
-    "channel": "Channel",
-
-    "user-id": "User ID",
-    "channel-id": "Channel ID",
-    "channel-discord-id": "Channel Discord ID",
-    "discord-id": "Discord ID",
-
-    "max-channels": "Max channels",
-    "country-whitelist": "Country whitelist",
-    "user-mentions": "User mentions",
-
-    "monitoring": "Monitoring",
-
-    "type": "Type",
-
+    "invalid-url-with-example": "Please provide a url in this format: eg. https://www.vinted.co.uk/catalog?...",
     "provide-valid-url": "Please provide a valid URL.",
-
-    "removing-country": "'Removing country from whitelist...'",
-    "user-not-found": "User not found.",
-    "channel-not-found": "Channel not found.",
-    "channel-not-found-nor-owned": "Channel not found or you don't own this channel.",
-    "channel-id-required": "Channel ID is required, please provide a channel ID",
-    "channel-name-required": "Channel name is required, please provide a channel name",
-    "country-removed": "Country removed from whitelist.",
-    "country-has-been-removed": "The country code {countryCode} has been successfully removed from the {type} whitelist.",
-
+    "must-have-brand-query-param": "URL must have brand query parameter. Please search for at least one brand.",
+    "must-have-query-params": "URL must have query parameters.",
+    "url-contains-search-text": "URL contains search_text parameter, the results may not be accurate or incomplete. Avoid using this parameter if possible to get the best results.",
+    
     "adding-country": "Adding country to whitelist...",
-    "invalid-country-code": "The {countryCode} is not a valid country code. Please select from one of those countries code : {validCountryCodes}",
     "country-added": "Country added to whitelist.",
     "country-has-been-added": "The country code {countryCode} has been successfully added to the {type} whitelist.",
+    "country-has-been-removed": "The country code {countryCode} has been successfully removed from the {type} whitelist.",
+    "country-removed": "Country removed from whitelist.",
+    "country-whitelist": "Country whitelist",
+    "invalid-country-code": "The {countryCode} is not a valid country code. Please select from one of those countries code : {validCountryCodes}",
+    "removing-country": "'Removing country from whitelist...'",
 
-    "creating-private-channel": "Creating private channel...",
-    "channel-limit-exceeded": "Channel limit exceeded. You can only create {limit} channel(s).",
-    "private-channel-created": "Private channel created.",
-    "private-channel-created-success": "Your private channel {channelName} has been successfully created.",
-
-    "deleting-private-channel": "Deleting private channel...",
-    "private-channel-deleted": "Private channel deleted.",
-    "private-channel-deleted-success": "Your private channel has been successfully deleted.",
-
-    "updating-mentions": "Updating mentions...",
-    "mentions-updated": "Mention updated.",
-    "mentions-has-been-updated": "The mentions have been {status} for the {type}.",
-
-    "starting-monitoring": "Starting monitoring...",
-    "monitoring-started": "Monitoring started.",
-    "monitoring-has-been-started": "The monitoring has been started [Vinted Catalog Search]({url}).",
-
-    "stopping-monitoring": "Stopping monitoring...",
-    "monitoring-stopped": "Monitoring stopped.",
-    "monitoring-has-been-stopped": "The monitoring has been stopped.",
-
+    "discord-id": "Discord ID",
+    "user": "User",
+    "user-id": "User ID",
     "user-info": "User info",
-    "channel-info": "Channel info",
-
     "user-info-success": "Find below the information about the user!",
-    "channel-info-success": "Find below the information about the channel!",
-
-    "not-authorized": "Not authorized. Please contact the administrator.",
     "user-not-admin": "The user is not an administrator.",
-    "not-allowed-to-create-private-channel": "The administrator has disabled the ability to create private channels. Please contact the administrator.",
+    "user-not-found": "User not found.",
 
+    "user-mentions": "User mentions",
+    "updating-mentions": "Updating mentions...",
+    
+    "channel": "Channel",
+    "channel-discord-id": "Channel Discord ID",
+    "channel-id": "Channel ID",
+    "channel-id-required": "Channel ID is required, please provide a channel ID",
+    "channel-info": "Channel info",
+    "channel-info-success": "Find the information about the channel below!",
+    "channel-name-required": "Channel name is required, please provide a channel name",
+    "channel-not-found": "Channel not found.",
+    "channel-not-found-nor-owned": "Channel not found or you don't own this channel.",
+    "no-channels-found": "No channels found, you should maybe create one first.",
+
+    "channel-limit-exceeded": "Channel limit exceeded. You can only create {limit} channel(s).",
+    "max-channels": "Max channels",
     "max-channels-set": "Max channels set.",
     "max-channels-set-success": "The max channels has been successfully set.",
 
-    "private-channel-welcome": "Welcome to your private channel {user}! You can now start monitoring the Vinted catalog search. `/start_monitoring`",
+    "all-public-channels-deleted": "Deleting all public channels...",
+    "all-public-channels-deleted-error": "There was an error deleting all public channels.\n```{error}```",
+    "all-public-channels-deleted-success": "All public channels have been successfully deleted.",
+    "creating-public-channel": "Creating public channel...",
+    "creating-public-channel-error": "There was an error creating the public channel.\n```{error}```",
+    "delete-all-public-channels": "Delete all public channels",
+    "deleting-public-channel": "Deleting public channel...",
+    "not-allowed-to-create-public-channel": "You do not have the required roles to create a public channel.",
+    "not-allowed-to-delete-public-channel": "You do not have the required roles to delete a public channel.",
+    "public-channel-created": "Public channel created.",
+    "public-channel-created-success": "Your public channel {channelName} has been successfully created.",
+    "public-channel-deleted": "Public channel deleted.",
+    "public-channel-deleted-error": "There was an error deleting the public channel.\n```{error}```",
+    "public-channel-deleted-success": "Your public channel has been successfully deleted.",
+    "public-channel-link-success": "Public channel has been linked successfully and is now monitoring [Vinted Search]({url}).",
+    "public-channel-not-found": "Public channel not found.",
+    "public-channel-welcome": "Welcome to your public channel {user}! You can now start monitoring the Vinted catalog search. `/monitoring start`",
 
-    "all-private-channels-deleted-success": "All private channels have been successfully deleted.",
     "all-private-channels-deleted": "Deleting all private channels...",
-
+    "all-private-channels-deleted-error": "There was an error deleting all private channels.\n```{error}```",
+    "all-private-channels-deleted-success": "All private channels have been successfully deleted.",
+    "creating-private-channel": "Creating private channel...",
     "delete-all-private-channels": "Delete all private channels",
-
-    "channel-inactivity-warning": "Your channel has been inactive for a while.",
-    "reply-to-keep-channel": "Reply to this message to keep the channel {channelName}, otherwise it will be deleted in {time} hours.",
-    "keep-channel": "Keep channel",
-    "delete-channel": "Delete channel",
-
-    "channel-kept": "Channel kept.",
+    "deleting-private-channel": "Deleting private channel...",
+    "not-allowed-to-create-private-channel": "The administrator has disabled the ability to create private channels. Please contact the administrator.",
+    "private-channel-created": "Private channel created.",
+    "private-channel-created-success": "Your private channel {channelName} has been successfully created.",
+    "private-channel-created-error": "There was an error creating the private channel.\n```{error}```",
+    "private-channel-delete-select": "Select the private channel to delete",
+    "private-channel-deleted": "Private channel deleted.",
+    "private-channel-deleted-error": "There was an error deleting the private channel.\n```{error}```",
+    "private-channel-deleted-discord-error": "Failed to delete private channel through Discord.\n```{error}```",
+    "private-channel-deleted-success": "Your private channel has been successfully deleted.",
+    "private-channel-welcome": "Welcome to your private channel {user}! You can now start monitoring the Vinted catalog search. `/monitoring start`",
+    
     "channel-deleted": "Channel deleted.",
+    "channel-inactivity-warning": "Your channel has been inactive for a while.",
+    "channel-kept": "Channel kept.",
+    "delete-channel": "Delete channel",
+    "keep-channel": "Keep channel",
+    "reply-to-keep-channel": "Reply to this message to keep the channel {channelName}, otherwise it will be deleted in {time} hours.",
 
-    "no-channels-found": "No channels found, you should maybe create one first.",
-    "deleting-all-private-channels": "Deleting all private channels...",
+    "mentions-updated": "Mention updated.",
+    "mentions-select-channel": "Select the channel to update mentions for",
+    "mentions-has-been-updated": "The mentions have been {status} for the {type}.",
+    "mentions-update-enabled": "Mentions have been enabled for the channel.",
+    "mentions-update-disabled": "Mentions have been disabled for the channel.",
+    "mentions-update-error": "There was an error updating the mentions.\n```{error}```",
 
-    "must-have-brand-query-param": "URL must have brand query parameter. Please search for at least one brand.",
+    "starting-monitoring": "Starting monitoring...",
+    "monitoring": "Monitoring",
+    "monitoring-started": "Monitoring started.",
+    "monitoring-start-error": "There was an error starting the monitoring session.\n```{error}```",
+    "monitoring-has-been-started": "The monitoring has been started [Vinted Catalog Search]({url}).",
+    "monitoring-has-been-stopped": "The monitoring has been stopped.",
+    "monitoring-stopped": "Monitoring stopped.",
+    "monitoring-stopped-error": "There was an error stopping the monitoring session.\n```{error}```",
+    "stopping-monitoring": "Stopping monitoring...",
+
+    "command-not-allowed-outside-commands-channel": "This command is not allowed outside the commands channel. Please use <#{commandChannelId}> or one of your private channels.",
+    "unknown-command": "Unknown command!",
+    "command-execution-error": "There was an error executing the command.\n```{error}```",
 
     "pause": "Pause",
     "pause-state": "Pause state",
@@ -111,5 +136,10 @@
     "pause-end": "End",
 
     "drop-data_not-allowed": "You are not allowed to drop vintedbots saved data.",
-    "drop-data_success": "vintedbot data has been dropped."
+    "drop-data_success": "vintedbot data has been dropped.",
+
+    "start-modal-title": "Start monitoring on Vinted",
+    "start-modal-url-label": "Vinted URL with search filters",
+    "start-modal-url-placeholder": "Insert vinted url as https://www.vinted.co.uk/catalog?...",
+    "start-modal-banned-words-label": "Banned words. Separate with comma (,)"
 }

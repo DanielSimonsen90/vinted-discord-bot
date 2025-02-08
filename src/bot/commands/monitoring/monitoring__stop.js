@@ -37,7 +37,7 @@ export default {
       await interaction.editReply({ embeds: [embed] });
     } catch (error) {
       console.error('Error stopping monitoring session:', error);
-      await sendErrorEmbed(interaction, 'There was an error stopping the monitoring session.');
+      await sendErrorEmbed(interaction, t(l, 'monitoring-stopped-error', { error }));
     }
   }
 };

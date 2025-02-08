@@ -87,7 +87,7 @@ const sendToChannel = async (item, user, vintedChannel) => {
   const { embed, photosEmbeds } = await createVintedItemEmbed(item, domain);
   const actionRow = await createVintedItemActionRow(item, domain);
 
-  const doMentionUser = user && vintedChannel.preferences.get(Preference.Mention);
+  const doMentionUser = user && vintedChannel.preferences[Preference.Mention];
   const mentionString = doMentionUser ? `<@${user.discordId}>` : '';
 
   try {
@@ -138,13 +138,13 @@ const monitorChannels = () => {
             [item],
             brandChannel.url,
             brandChannel.bannedKeywords,
-            brandChannel.preferences.get(Preference.Countries) || []
+            brandChannel.preferences[Preference.Countries] || []
           );
 
           if (matchingItems.length > 0) sendToChannel(item, user, brandChannel);
         } catch (error) {
-          Logger.debug('Error sending to channel');
-          Logger.debug(error);
+          Logger.error('Error sending to channel');
+          Logger.error(error);
         }
       }
     }

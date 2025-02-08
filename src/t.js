@@ -1,3 +1,4 @@
+import { Locale } from "discord.js";
 import LanguageService from "./utils/language.js";
 
 function formatString(template, values) {
@@ -6,7 +7,12 @@ function formatString(template, values) {
   ));
 }
 
-export default function t(lang, key, values = {}) {
+/**
+ * @param {string} lang 
+ * @param {string} key 
+ * @param {Record<string, string> | undefined} values 
+ */
+function t(lang, key, values = {}) {
   try {
     const template = LanguageService.getText(lang, key);
     return formatString(template, values);
@@ -14,4 +20,16 @@ export default function t(lang, key, values = {}) {
     console.error(error);
     return `Missing translation for "${key}" in "${lang}"`;
   }
+}
+
+export default t;
+
+/**
+ * @param {string} lang 
+ * @param {string} key 
+ * @param {string} icon 
+ * @param {Record<string, string> | undefined} values 
+ */
+export function tWithIcon(lang, key, icon, values = {}) {
+  return `${icon} ${t(lang, key, values)}`;
 }

@@ -1,5 +1,5 @@
 import { REST } from '@discordjs/rest';
-import { ContextMenuCommandBuilder, Routes, SlashCommandBuilder } from 'discord.js';
+import { CommandInteraction, ContextMenuCommandBuilder, Routes, SlashCommandBuilder } from 'discord.js';
 import fs from 'fs';
 import path from 'path';
 import { fileURLToPath } from 'url';
@@ -55,6 +55,11 @@ export async function registerCommands() {
   }
 }
 
+/**
+ * 
+ * @param {CommandInteraction} interaction 
+ * @returns 
+ */
 export async function handleCommands(interaction) {
   if (!interaction.isCommand()) return;
 
@@ -66,22 +71,33 @@ export async function handleCommands(interaction) {
   // Check if the command is allowed to be executed in the command channel or in thread channels
   if (interaction.channelId !== commandChannelId && !isThread) {
     return interaction.reply({ 
-      content: `This command is not allowed in this channel. Please use <#${commandChannelId}> or one of your private channels.`,
-      ephemeral: true 
+      content: t(interaction.locale, 'command-not-allowed-outside-commands-channel', { commandChannelId }),
+      flags: 'Ephemeral'
     });
   }
 
   try {
-    const command = commands.find(cmd => cmd.data.name === interaction.commandName);
-    await command.execute(interaction);
+    const command = commands.find(cmd => cmd.data.name === interaction.commandName && !cmd.subcommand);
+    if ('execute' in command) return command.execute(interaction);
+    
+    const subcommandName = interaction.options.getSubcommand();
+    if (subcommandName) {
+      const subcommand = commands.find(cmd => cmd.data.name === subcommandName);
+      if ('execute' in subcommand) return subcommand.execute(interaction);
+    }
+    
+    return interaction.reply({
+      content: t(interaction.locale, 'unknown-command'),
+      flags: 'Ephemeral'
+    });
   } catch (error) {
     Logger.error('Error handling command:', error);
 
     // prevent crash if interaction is not found
     try {
       await interaction.reply({ 
-        content: 'There was an error while executing this command!', 
-        ephemeral: true 
+        content: t(interaction.locale, 'command-execution-error', { error }),
+        flags: 'Ephemeral'
       });
     }
     catch (error) {

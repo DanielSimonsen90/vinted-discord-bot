@@ -1,6 +1,7 @@
 import { SlashCommandSubcommandBuilder } from "discord.js";
 import { createBaseEmbed, sendErrorEmbed, sendWaitingEmbed } from "../../components/base_embeds.js";
 import * as crud from '../../../crud.js';
+import t from '../../../t.js';
 
 export default {
   data: new SlashCommandSubcommandBuilder()
@@ -9,31 +10,31 @@ export default {
 
   execute: async (interaction) => {
     try {
-      await sendWaitingEmbed(interaction, 'Deleting public channel...');
+      await sendWaitingEmbed(interaction, t(l, 'deleting-public-channel'));
 
       const isUserAdmin = await crud.isUserAdmin(interaction);
-      if (!isUserAdmin) return sendErrorEmbed(interaction, 'You do not have permission to delete a public channel.');
+      if (!isUserAdmin) return sendErrorEmbed(interaction, t(l, 'not-allowed-to-delete-public-channel'));
 
       const channelId = interaction.channel.id;
 
       // Find the VintedChannel by channelId
       const vintedChannel = await crud.getVintedChannelById(channelId);
-      if (!vintedChannel || vintedChannel.type !== 'public') return sendErrorEmbed(interaction, 'Public channel not found.');
+      if (!vintedChannel || vintedChannel.type !== 'public') return sendErrorEmbed(interaction, t(l, 'public-channel-not-found'));
 
       // Delete the VintedChannel from the database
       await crud.deleteVintedChannel(vintedChannel.id);
 
       const embed = await createBaseEmbed(
         interaction,
-        'Public Channel Deleted',
-        `Public channel with ID ${channelId} has been deleted successfully.`,
+        t(l, 'public-channel-deleted'),
+        t(l, 'public-channel-deleted-success'),
         0xFF0000
       );
 
       await interaction.editReply({ embeds: [embed] });
     } catch (error) {
       console.error('Error deleting public channel:', error);
-      await sendErrorEmbed(interaction, 'There was an error deleting the public channel.');
+      await sendErrorEmbed(interaction, t(l, 'public-channel-deleted-error', { error }));
     }
   }
 };

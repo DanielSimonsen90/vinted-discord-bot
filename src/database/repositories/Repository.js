@@ -107,6 +107,7 @@ export class Repository {
   constructor(fileName, RepoItem) {
     this.fileName = fileName;
     this.__cache = this.load(fileName, RepoItem);
+    // this.__repoItem = RepoItem;
   }
 
   // #region File DB

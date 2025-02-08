@@ -1,6 +1,7 @@
 import { SlashCommandSubcommandBuilder } from "discord.js";
 import { createBaseEmbed, sendErrorEmbed, sendWaitingEmbed } from "../../components/base_embeds.js";
 import * as crud from '../../../crud.js';
+import t from "../../../t.js";
 
 export default {
   data: new SlashCommandSubcommandBuilder()
@@ -12,11 +13,12 @@ export default {
         .setRequired(true)),
   
   execute: async (interaction) => {
+    const { locale: l } = interaction;
     try {
-      await sendWaitingEmbed(interaction, 'Creating public channel...');
+      await sendWaitingEmbed(interaction, t(l, 'please-wait'), t(l, 'creating-public-channel'));
 
       const isUserAdmin = await crud.isUserAdmin(interaction);
-      if (!isUserAdmin) return sendErrorEmbed(interaction, 'You do not have permission to create a public channel.');
+      if (!isUserAdmin) return sendErrorEmbed(interaction, t(l, 'not-allowed-to-create-public-channel'));
 
       const url = interaction.options.getString('url');
 
@@ -32,15 +34,15 @@ export default {
 
       const embed = await createBaseEmbed(
         interaction,
-        'Public Channel Created',
-        `Public channel has been linked successfully and is now monitoring [Vinted Search](${url}).`,
+        t(l, 'public-channel-created'),
+        t(l, 'public-channel-link-success', { url }),
         0x00FF00
       );
 
       await interaction.editReply({ embeds: [embed] });
     } catch (error) {
       console.error('Error creating public channel:', error);
-      await sendErrorEmbed(interaction, 'There was an error creating the public channel.');
+      await sendErrorEmbed(interaction, t(l, 'creating-public-channel-error', { error }));
     }
   }
 }
