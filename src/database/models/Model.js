@@ -19,11 +19,15 @@ export class Model {
    */
   populate(...data) {
     for (const { property, repo } of data) {
+      if (typeof this[property] === 'object' && 'id' in this[property]) {
+        this[property] = this[property].id;
+      }
+
       const resolvedValue = Array.isArray(this[property])
-        ? this[property].map(repo.findById.bind(repo))
+        ? this[property].map(repo.findById.bind(repo)).filter(Boolean)
         : repo.findById(this[property]);
 
-      if (Array.isArray(resolvedValue) ? resolvedValue.filter(Boolean).length : resolvedValue !== undefined) {
+      if (Array.isArray(resolvedValue) ? resolvedValue.length : resolvedValue !== undefined) {
         this[property] = resolvedValue;
         this.#relations[property] = repo;
       }

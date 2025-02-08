@@ -1,7 +1,7 @@
 import { ActionRowBuilder, CommandInteraction, ModalBuilder, SlashCommandBuilder, TextInputBuilder, TextInputStyle } from "discord.js";
-import { validateUrl } from '../../services/url_service.js';
+import { validateUrl, urlContainsSearchTextParameter, getDomainInUrl } from '../../services/url_service.js';
 import t from "../../t.js";
-import { sendWaitingEmbed, sendErrorEmbed, sendWarningEmbed } from "../components/base_embeds.js";
+import { createBaseEmbed, sendWaitingEmbed, sendErrorEmbed, sendWarningEmbed } from "../components/base_embeds.js";
 import * as crud from '../../crud.js';
 import { Preference, ShippableMap } from '../../database/index.js';
 
@@ -42,9 +42,6 @@ export default {
       // Find the VintedChannel by channelId and ensure it's owned by the user
       const vintedChannel = user.channels.find(channel => channel.channelId === channelId && channel.user === user.id);
       if (!vintedChannel) return sendErrorEmbed(interaction, t(l, 'channel-not-found-nor-owned'));
-
-      // Check if URL is provided or present in the VintedChannel - Danho note: although this can't happen BECAUSE we already validated the url and returned out if invalid?
-      if (url && !vintedChannel.url) return sendErrorEmbed(interaction, t(l, 'provide-vaild-url') + " " + t(l, url));
 
       // Check if the URL contains the search_text parameter
       if (urlContainsSearchTextParameter(url)) await sendWarningEmbed(interaction, t(l, 'url-contains-search-text'));

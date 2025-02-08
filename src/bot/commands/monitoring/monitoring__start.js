@@ -3,7 +3,7 @@ import { createBaseEmbed, sendErrorEmbed, sendWaitingEmbed, sendWarningEmbed } f
 import * as crud from '../../../crud.js';
 import t from '../../../t.js';
 import { Preference, ShippableMap } from '../../../database/index.js';
-import { validateUrl } from "../../../services/url_service.js";
+import { validateUrl, urlContainsSearchTextParameter, getDomainInUrl } from "../../../services/url_service.js";
 
 export default {
   data: new SlashCommandSubcommandBuilder()
@@ -70,21 +70,4 @@ export default {
       await sendErrorEmbed(interaction, 'There was an error starting the monitoring session.');
     }
   }
-}
-
-
-
-function urlContainsSearchTextParameter(url) {
-  return new URL(url).searchParams.has('search_text');
-}
-
-// get .fr or other domain from the URL
-function getDomainInUrl(url) {
-  const urlObj = new URL(url);
-  let domain = urlObj.hostname.split('.').pop();
-
-  // handle .co.uk and other domains get only uk
-  if (domain === 'co') domain = urlObj.hostname.split('.').slice(-2)[0];
-
-  return domain;
 }

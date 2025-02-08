@@ -149,3 +149,18 @@ export function validateUrl(url) {
     return "invalid-url";
   }
 }
+
+export function urlContainsSearchTextParameter(url) {
+  return new URL(url).searchParams.has('search_text');
+}
+
+// get .fr or other domain from the URL
+export function getDomainInUrl(url) {
+  const urlObj = new URL(url);
+  let domain = urlObj.hostname.split('.').pop();
+
+  // handle .co.uk and other domains get only uk
+  if (domain === 'co') domain = urlObj.hostname.split('.').slice(-2)[0];
+
+  return domain;
+}
