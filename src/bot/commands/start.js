@@ -33,10 +33,10 @@ export default {
     if (!validation) return sendErrorEmbed(interaction, t(l, validation));
 
     try {
-      await sendWaitingEmbed(interaction, 'Creating public channel...');
+      await sendWaitingEmbed(interaction, t(l, 'creating-public-channel'));
 
       const isUserAdmin = await crud.isUserAdmin(interaction);
-      if (!isUserAdmin) return sendErrorEmbed(interaction, 'You do not have permission to create a public channel.');
+      if (!isUserAdmin) return sendErrorEmbed(interaction, t(l, 'not-allowed-to-create-public-channel'));
       else if (urlContainsSearchTextParameter(url)) await sendWarningEmbed(interaction, t(l, 'url-contains-search-text'));
 
       // Create the VintedChannel
@@ -60,7 +60,7 @@ export default {
       await interaction.editReply({ embeds: [embed] });
     } catch (error) {
       console.error('Error creating public channel:', error);
-      await sendErrorEmbed(interaction, 'There was an error creating the public channel.');
+      await sendErrorEmbed(interaction, t(l, 'creating-public-channel-error', { error }));
     }
   }
 };
@@ -70,6 +70,7 @@ export default {
  * @returns {Promise<[url: string, bannedWords?: string]>}
  */
 async function ensureUrl(interaction) {
+  const l = interaction.locale;
   const urlOption = interaction.options.getString(URL_KEY);
   const bannedWordsOption = interaction.options.getString(BANNED_WORDS_KEY);
   if (urlOption) return [urlOption, bannedWordsOption];
@@ -80,23 +81,24 @@ async function ensureUrl(interaction) {
 
   interaction.showModal(new ModalBuilder()
     .setCustomId(modalId)
-    .setTitle("Start udkiggelse på Vinted")
+    .setTitle(t(l, 'start-modal-title'))
     .addComponents(
       new ActionRowBuilder().addComponents(
         new TextInputBuilder()
           .setCustomId(urlInputId)
-          .setLabel("Vinted URL med søgrefiltre")
+          .setLabel(t(l, 'start-modal-url-label'))
           .setStyle(TextInputStyle.Short)
           .setRequired(true)
-          .setPlaceholder("Indsæt vinted url som: https://www.vinted.dk/catalog?...")),
+          .setPlaceholder(t(l, 'start-modal-url-placeholder')),
       new ActionRowBuilder().addComponents(
         new TextInputBuilder()
           .setCustomId(bannedWordsId)
-          .setLabel("Ignorerde ord. Adskil med komma (,)")
+          .setLabel(t(l, 'start-modal-banned-words-label'))
           .setStyle(TextInputStyle.Paragraph)
           .setRequired(false)
-      ),
-    ));
+      )
+    ))
+  );
 
   const modalInteraction = await interaction.awaitModalSubmit({
     time: 60_000,

@@ -1,4 +1,4 @@
-import { SlashCommandSubcommandBuilder, StringSelectMenuBuilder, ActionRowBuilder } from 'discord.js';
+import { SlashCommandSubcommandBuilder, StringSelectMenuBuilder, ActionRowBuilder, CommandInteraction } from 'discord.js';
 import { sendErrorEmbed, sendWaitingEmbed } from "../../components/base_embeds.js";
 import * as crud from '../../../crud.js';
 import t from '../../../t.js';
@@ -8,6 +8,9 @@ export default {
     .setName("delete")
     .setDescription("Delete a private monitoring channel."),
 
+  /**
+   * @param {CommandInteraction} interaction 
+   */
   execute: async (interaction) => {
     try {
       const l = interaction.locale;
@@ -25,7 +28,7 @@ export default {
       // Create a select menu for channel selection
       const channelMenu = new StringSelectMenuBuilder()
         .setCustomId('channel_delete_select' + discordId)
-        .setPlaceholder('Select the private channel to delete')
+        .setPlaceholder(t(l, 'private-channel-delete-select'))
         .addOptions(channels.map(channel => ({
           label: channel.name,
           value: channel.channelId
@@ -33,7 +36,7 @@ export default {
 
       const row = new ActionRowBuilder().addComponents(channelMenu);
       await interaction.followUp({
-        content: 'Please select the private channel you want to delete:',
+        content: t(l, 'select-channel-to-delete'),
         components: [row],
         ephemeral: true,
       });
@@ -52,23 +55,22 @@ export default {
         await crud.removeChannelFromUserByIds(interaction.user.id, channelId);
 
         await channelInteraction.update({
-          content: `The private channel has been deleted.`,
+          content: t(l, 'private-channel-deleted'),
           components: []
         });
 
         try {
           const discordChannel = interaction.guild.channels.cache.get(channelId);
-
-          await discordChannel.delete();
+          await discordChannel.delete(`${interaction.user.username} deleted channel through /private_channel delete.`);
         } catch (error) {
           console.error('Error deleting private channel:', error);
-          await sendErrorEmbed(interaction, 'There was an error deleting the private channel, but was from the database: ```' + error + '```');
+          await sendErrorEmbed(interaction, t(l, 'private-channel-deleted-discord-error'));
         }
       });
 
     } catch (error) {
       console.error('Error deleting private channel:', error);
-      await sendErrorEmbed(interaction, 'There was an error deleting the private channel.');
+      await sendErrorEmbed(interaction, t(interaction.locale, 'private-channel-deleted-error'));
     }
   }
 };

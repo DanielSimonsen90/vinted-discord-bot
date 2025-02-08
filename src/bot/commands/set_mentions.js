@@ -35,7 +35,7 @@ export default {
       // Create a select menu for channel selection
       const channelMenu = new StringSelectMenuBuilder()
         .setCustomId('channel_select' + discordId)
-        .setPlaceholder('Select the channel to set mentions for')
+        .setPlaceholder(t(l, 'mentions-select-channel'))
         .addOptions(channels.map(channel => ({
           label: channel.name,
           value: channel.channelId
@@ -43,7 +43,7 @@ export default {
 
       const row = new ActionRowBuilder().addComponents(channelMenu);
       await interaction.followUp({
-        content: 'Please select the channel you want to set mentions for:',
+        content: t(l, 'select-channel-for-mentions'),
         components: [row],
         ephemeral: true,
       });
@@ -62,7 +62,7 @@ export default {
 
         // remove the select menu
         await channelInteraction.update({
-          content: `Mentions have been ${status} for the channel.`,
+          content: t(l, `mentions-update-${status}`),
           components: [],
         });
 
@@ -71,7 +71,7 @@ export default {
 
     } catch (error) {
       console.error(`Error updating mentions:`, error);
-      await sendErrorEmbed(interaction, 'There was an error updating mentions.');
+      await sendErrorEmbed(interaction, t(l, 'mentions-update-error', { error }));
     }
   }
 }

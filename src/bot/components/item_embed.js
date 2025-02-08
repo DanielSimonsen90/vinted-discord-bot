@@ -1,6 +1,9 @@
 import { EmbedBuilder, ActionRowBuilder } from "discord.js";
-import { createBaseActionButton, createBaseEmbed, createBaseUrlButton } from "./base_embeds.js";
+import { createBaseEmbed, createBaseUrlButton } from "./base_embeds.js";
 import Logger from "../../utils/logger.js";
+import { tWithIcon } from "../../t.js";
+import client from '../../client.js';
+const l = client.guilds.cache.get(process.env.DISCORD_GUILD_ID)?.preferredLocale;
 
 function getNumberOfStars(rating) {
   rating = rating * 5;
@@ -38,13 +41,13 @@ export async function createVintedItemEmbed(item, domain = "fr") {
   const ratingAllText = `${item.user.feedback_count}`;
 
   embed.setFields([
-    { name: '💰 Price', value: `${item.priceNumeric} ${item.currency}`, inline: true },
-    { name: '📏 Size', value: `${item.size} `, inline: true },
-    { name: '🏷️ Brand', value: `${item.brand} `, inline: true },
-    { name: '🌍 Country', value: `${getFlagEmoji(item.user.countryCode)} `, inline: true },
-    { name: '⭐️ User Rating', value: `${ratingStars} (${ratingTextRounded}) of ${ratingAllText}`, inline: true },
-    { name: '📦 Condition', value: `${item.status} `, inline: true },
-    { name: '📅 Updated', value: `${item.unixUpdatedAtString} `, inline: true },
+    { name: tWithIcon(l, 'price', '💰'), value: `${item.priceNumeric} ${item.currency}`, inline: true },
+    { name: tWithIcon(l, 'size', '📏'), value: item.size, inline: true },
+    { name: tWithIcon(l, 'brand', '🏷️'), value: item.brand, inline: true },
+    { name: tWithIcon(l, 'country', '🌍'), value: getFlagEmoji(item.user.countryCode), inline: true },
+    { name: tWithIcon(l, 'user-rating', '⭐️'), value: `${ratingStars} (${ratingTextRounded}) of ${ratingAllText}`, inline: true },
+    { name: tWithIcon(l, 'condition', '📦'), value: item.status, inline: true },
+    { name: tWithIcon(l, 'updated', '📅'), value: item.unixUpdatedAtString, inline: true },
   ]);
 
   const photosEmbeds = [];
@@ -80,14 +83,13 @@ export async function createVintedItemEmbed(item, domain = "fr") {
 
 export async function createVintedItemActionRow(item, domain) {
   const actionRow = new ActionRowBuilder();
-
   const sendMessageUrl = `https://www.vinted.${domain}/items/${item.id}/want_it/new?button_name=receiver_id=${item.id}`;
   const buyUrl = `https://www.vinted.${domain}/transaction/buy/new?source_screen=item&transaction%5Bitem_id%5D=${item.id}`;
 
   actionRow.addComponents(
-    await createBaseUrlButton("🔗 View on Vinted", replaceDomainInUrl(item.url, domain)),
-    await createBaseUrlButton("📨 Send Message", sendMessageUrl),
-    await createBaseUrlButton("💸 Buy", buyUrl)
+    await createBaseUrlButton(tWithIcon(l, 'view-on-vinted', '🔗'), replaceDomainInUrl(item.url, domain)),
+    await createBaseUrlButton(tWithIcon(l, 'send-message', '📨'), sendMessageUrl),
+    await createBaseUrlButton(tWithIcon(l, 'buy', '💸'), buyUrl)
   );
 
   return actionRow;

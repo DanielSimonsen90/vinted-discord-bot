@@ -11,7 +11,7 @@ export default {
   execute: async (interaction) => {
     try {
       const l = interaction.locale;
-      await sendWaitingEmbed(interaction, t(l, 'deleting-all-private-channels'));
+      await sendWaitingEmbed(interaction, t(l, 'all-private-channels-deleted'));
 
       // Check if the user is an admin
       const isAdmin = await crud.isUserAdmin(interaction);
@@ -56,7 +56,7 @@ export default {
 
     } catch (error) {
       console.error('Error deleting all private channels:', error);
-      await sendErrorEmbed(interaction, 'There was an error deleting the private channels.');
+      await sendErrorEmbed(interaction, t(l, 'all-private-channels-deleted-error', { error }));
     }
   }
 };

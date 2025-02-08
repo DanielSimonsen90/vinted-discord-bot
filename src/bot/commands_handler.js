@@ -71,7 +71,7 @@ export async function handleCommands(interaction) {
   // Check if the command is allowed to be executed in the command channel or in thread channels
   if (interaction.channelId !== commandChannelId && !isThread) {
     return interaction.reply({ 
-      content: `This command is not allowed in this channel. Please use <#${commandChannelId}> or one of your private channels.`,
+      content: t(interaction.locale, 'command-not-allowed-outside-commands-channel', { commandChannelId }),
       flags: 'Ephemeral'
     });
   }
@@ -87,7 +87,7 @@ export async function handleCommands(interaction) {
     }
     
     return interaction.reply({
-      content: 'Unknown command!',
+      content: t(interaction.locale, 'unknown-command'),
       flags: 'Ephemeral'
     });
   } catch (error) {
@@ -96,8 +96,8 @@ export async function handleCommands(interaction) {
     // prevent crash if interaction is not found
     try {
       await interaction.reply({ 
-        content: 'There was an error while executing this command!', 
-        ephemeral: true 
+        content: t(interaction.locale, 'command-execution-error', { error }),
+        flags: 'Ephemeral'
       });
     }
     catch (error) {

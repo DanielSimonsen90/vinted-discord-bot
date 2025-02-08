@@ -3,7 +3,6 @@ import { SlashCommandSubcommandBuilder } from "discord.js";
 import t from '../../../t.js';
 import { REPOS } from '../../../database/repositories/index.js';
 import Repository from '../../../database/repositories/Repository.js';
-import ConfigurationManager from '../../../utils/config_manager.js';
 import { isUserAdmin } from "../../../crud.js";
 
 export default {
