@@ -1,12 +1,16 @@
 import { ActionRowBuilder, ChannelType, ButtonBuilder, ButtonStyle, Client, Guild } from 'discord.js';
-import ProxyManager from '../utils/proxy_manager.js';
-import { ForbiddenError, NotFoundError } from '../helpers/execute_helper.js';
 import axios from 'axios';
+
+import { ForbiddenError, NotFoundError } from '../utils/execute_helper.js';
+
+import ProxyManager from '../managers/proxy_manager.js';
 import Logger from '../utils/logger.js';
-import * as crud from '../crud.js';
-import ConfigurationManager from '../utils/config_manager.js';
+import ConfigurationManager from '../managers/config_manager.js';
+
+import * as crud from '../database/crud.js';
 import { createBaseEmbed } from '../bot/components/base_embeds.js';
-import t from '../t.js';
+
+import LanguageService from './language_service.js';
 
 const discordConfig = ConfigurationManager.getDiscordConfig;
 const guildId = discordConfig.guildId;
@@ -87,11 +91,14 @@ export async function checkVintedChannelInactivity(client) {
           continue;
         }
 
+        const language = new LanguageService(member.guild.preferredLocale);
+        const t = language.t.bind(language);
+
         // Prepare a message to ask if they want to keep the channel
         const embed = await createBaseEmbed(
           null, // no interaction needed here
-          t(user.locale, 'channel-inactivity-warning'),
-          t(user.locale, 'reply-to-keep-channel', { channelName: `<#${channelId}>`, time: 24 }),
+          t('channel-inactivity-warning'),
+          t('reply-to-keep-channel', { channelName: `<#${channelId}>`, time: 24 }),
           0xFFA500
         );
 
@@ -101,11 +108,11 @@ export async function checkVintedChannelInactivity(client) {
             new ButtonBuilder()
               .setStyle(ButtonStyle.Primary)
               .setCustomId('keep_channel' + userData.discordId)
-              .setLabel(t(user.locale, 'keep-channel')),
+              .setLabel(t('keep-channel')),
             new ButtonBuilder()
               .setStyle(ButtonStyle.Danger)
               .setCustomId('delete_channel' + userData.discordId)
-              .setLabel(t(user.locale, 'delete-channel'))
+              .setLabel(t('delete-channel'))
           );
 
         // Send the message to the user via DM
@@ -122,24 +129,22 @@ export async function checkVintedChannelInactivity(client) {
             // User wants to keep the channel
             await crud.setVintedChannelUpdatedAtNow(channelId);
             await crud.setVintedChannelKeepMessageSent(channelId, false);
-            await interaction.reply({ content: t(user.locale, 'channel-kept'), ephemeral: true });
+            await interaction.reply({ content: t('channel-kept'), ephemeral: true });
           } else if (interaction.customId === 'delete_channel' + userData.discordId) {
             // User wants to delete the channel
             await crud.deleteVintedChannelByChannelId(channelId);
 
-            await interaction.reply({ content: t(user.locale, 'channel-deleted'), ephemeral: true });
+            await interaction.reply({ content: t('channel-deleted'), ephemeral: true });
 
             // Delete the channel if it still exists
             const discordChannel = client.guilds.cache.get(guildId).channels.cache.get(channelId);
-            if (discordChannel) {
-              await discordChannel.delete();
-            }
+            if (discordChannel) await discordChannel.delete();
           }
         }).on('end', async collected => {
           // If no response is collected after 24 hours, delete the channel
           if (collected.size === 0) {
             await crud.deleteVintedChannelByChannelId(channelId);
-            await member.send(t(user.locale, 'channel-deleted'));
+            await member.send(t('channel-deleted'));
           }
         });
       }

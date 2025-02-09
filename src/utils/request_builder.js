@@ -1,8 +1,8 @@
 import axios from 'axios';
-import ProxyManager from './proxy_manager.js';
 import { getRandom } from 'random-useragent';
+import ProxyManager from '../managers/proxy_manager.js';
+import ConfigurationManager from '../managers/config_manager.js';
 import Logger from './logger.js';
-import ConfigurationManager from './config_manager.js';
 
 const vinted_api_domain_extension = ConfigurationManager.getAlgorithmSetting.vintedApiDomainExtension;
 

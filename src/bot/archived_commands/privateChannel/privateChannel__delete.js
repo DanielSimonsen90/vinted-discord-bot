@@ -1,7 +1,7 @@
 import { SlashCommandSubcommandBuilder, StringSelectMenuBuilder, ActionRowBuilder, CommandInteraction } from 'discord.js';
 import { sendErrorEmbed, sendWaitingEmbed } from "../../components/base_embeds.js";
-import * as crud from '../../../crud.js';
-import t from '../../../t.js';
+import * as crud from '../../../database/crud.js';
+import LanguageService from '../../../services/language_service.js';
 
 export default {
   data: new SlashCommandSubcommandBuilder()
@@ -12,23 +12,24 @@ export default {
    * @param {CommandInteraction} interaction 
    */
   execute: async (interaction) => {
+    const { t } = new LanguageService(interaction.locale);
+
     try {
-      const l = interaction.locale;
       const discordId = interaction.user.id;
 
-      await sendWaitingEmbed(interaction, t(l, 'deleting-private-channel'));
+      await sendWaitingEmbed(interaction, t('deleting-private-channel'));
 
       // Get the user and ensure they exist
       const user = await crud.getUserByDiscordId(discordId);
-      if (!user) return sendErrorEmbed(interaction, t(l, 'user-not-found'));
+      if (!user) return sendErrorEmbed(interaction, t('user-not-found'));
 
       const channels = user.channels;
-      if (channels.length === 0) return sendErrorEmbed(interaction, t(l, 'no-channels-found'));
+      if (channels.length === 0) return sendErrorEmbed(interaction, t('no-channels-found'));
 
       // Create a select menu for channel selection
       const channelMenu = new StringSelectMenuBuilder()
         .setCustomId('channel_delete_select' + discordId)
-        .setPlaceholder(t(l, 'private-channel-delete-select'))
+        .setPlaceholder(t('private-channel-delete-select'))
         .addOptions(channels.map(channel => ({
           label: channel.name,
           value: channel.channelId
@@ -36,7 +37,7 @@ export default {
 
       const row = new ActionRowBuilder().addComponents(channelMenu);
       await interaction.followUp({
-        content: t(l, 'select-channel-to-delete'),
+        content: t('select-channel-to-delete'),
         components: [row],
         ephemeral: true,
       });
@@ -55,7 +56,7 @@ export default {
         await crud.removeChannelFromUserByIds(interaction.user.id, channelId);
 
         await channelInteraction.update({
-          content: t(l, 'private-channel-deleted'),
+          content: t('private-channel-deleted'),
           components: []
         });
 
@@ -64,13 +65,13 @@ export default {
           await discordChannel.delete(`${interaction.user.username} deleted channel through /private_channel delete.`);
         } catch (error) {
           console.error('Error deleting private channel:', error);
-          await sendErrorEmbed(interaction, t(l, 'private-channel-deleted-discord-error'));
+          await sendErrorEmbed(interaction, t('private-channel-deleted-discord-error'));
         }
       });
 
     } catch (error) {
       console.error('Error deleting private channel:', error);
-      await sendErrorEmbed(interaction, t(interaction.locale, 'private-channel-deleted-error'));
+      await sendErrorEmbed(interaction, t('private-channel-deleted-error'));
     }
   }
 };

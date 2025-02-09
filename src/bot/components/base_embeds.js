@@ -1,8 +1,7 @@
 import { EmbedBuilder, ButtonBuilder, ButtonStyle, ComponentType } from 'discord.js';
-import t from '../../t.js';
+import LanguageService from '../../services/language_service.js';
 
 /**
- * 
  * @param {import('discord.js').Interaction} interaction - The original interaction.
  * @param {string} title - The title of the embed.
  * @param {string} description - The description of the embed.
@@ -28,34 +27,52 @@ async function createBaseEmbed(interaction, title, description, color) {
 }
 
 /**
- * 
  * @param {Interaction} interaction - The original interaction.
  * @param {string} description - The description of the embed.
  */
 async function sendWaitingEmbed(interaction, description) {
-  const l = interaction.locale;
-  const embed = await createBaseEmbed(interaction, t(l, "please-wait"), description, 0x1DB954);
+  const embed = await createBaseEmbed(
+    interaction, 
+    new LanguageService(interaction.locale).t("please-wait"), 
+    description, 
+    0x1DB954
+  );
 
   await interaction.reply({ embeds: [embed] });
 }
 
 async function sendNotFoundEmbed(interaction, description) {
   const l = interaction.locale;
-  const embed = await createBaseEmbed(interaction, t(l, "not-found"), description, 0xFF0000);
+  const embed = await createBaseEmbed(
+    interaction, 
+    new LanguageService(l).t("not-found"),
+    description, 
+    0xFF0000
+  );
 
   await interaction.followUp({ embeds: [embed] });
 }
 
 async function sendWarningEmbed(interaction, description) {
   const l = interaction.locale;
-  const embed = await createBaseEmbed(interaction, t(l, "warning"), description, 0xFFFF00);
+  const embed = await createBaseActionButton(
+    interaction, 
+    new LanguageService(l).t("warning"), 
+    description, 
+    0xFFFF00
+  )
 
   await interaction.followUp({ embeds: [embed] });
 }
 
 async function sendErrorEmbed(interaction, description) {
   const l = interaction.locale;
-  const embed = await createBaseEmbed(interaction, t(l, "error"), description, 0xFF0000);
+  const embed = await createBaseEmbed(
+    interaction, 
+    new LanguageService(l).t("error"), 
+    description, 
+    0xFF0000
+  )
 
   await interaction.followUp({ embeds: [embed] });
 }

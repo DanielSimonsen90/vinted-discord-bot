@@ -1,7 +1,6 @@
-import { executeWithDetailedHandling } from "../helpers/execute_helper.js";
 import RequestBuilder from "../utils/request_builder.js";
-import ConfigurationManager from "../utils/config_manager.js";
-import { NotFoundError, ForbiddenError, RateLimitError } from "../helpers/execute_helper.js";
+import ConfigurationManager from "../managers/config_manager.js";
+import { executeWithDetailedHandling, NotFoundError, ForbiddenError, RateLimitError } from "../utils/execute_helper.js";
 
 const extension = ConfigurationManager.getAlgorithmSetting.vintedApiDomainExtension;
 

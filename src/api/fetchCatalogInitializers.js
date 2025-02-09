@@ -1,7 +1,6 @@
-import { executeWithDetailedHandling } from "../helpers/execute_helper.js";
+import { executeWithDetailedHandling, NotFoundError } from "../utils/execute_helper.js";
 import RequestBuilder from "../utils/request_builder.js";
-import ConfigurationManager from "../utils/config_manager.js";
-import { NotFoundError } from "../helpers/execute_helper.js";
+import ConfigurationManager from "../managers/config_manager.js";
 
 const extension = ConfigurationManager.getAlgorithmSetting.vintedApiDomainExtension;
 

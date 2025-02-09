@@ -1,4 +1,4 @@
-import ConfigurationManager from '../../utils/config_manager.js';
+import ConfigurationManager from '../../managers/config_manager.js';
 import Model from './Model.js';
 
 // const userSchema = new Schema({

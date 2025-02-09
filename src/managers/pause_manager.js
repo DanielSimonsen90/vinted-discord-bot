@@ -1,6 +1,6 @@
 import schedule from 'node-schedule';
 import SettingsRepository from '../database/repositories/SettingsRepository.js';
-import Logger from './logger.js';
+import Logger from '../utils/logger.js';
 
 const DEFAULT_PAUSE_START_HOUR = 0;
 const DEFAULT_PAUSE_END_HOUR = 6;

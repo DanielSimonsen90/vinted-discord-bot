@@ -1,8 +1,8 @@
 import { CommandInteraction, SlashCommandSubcommandBuilder } from "discord.js";
-import t from '../../../t.js';
+import LanguageService from "../../../services/language_service.js";
 
 import { SettingsRepository } from '../../../database/index.js';
-import PauseManager from '../../../utils/pause_manager.js';
+import PauseManager from '../../../managers/pause_manager.js';
 
 const PAUSE_REQUEST_VALUE = 'pause';
 const RESUME_REQUEST_VALUE = 'resume';
@@ -34,6 +34,7 @@ export default {
    * @param {CommandInteraction} interaction 
    */
   execute: async (interaction) => {
+    const { t } = new LanguageService(interaction.locale);
     const pauseState = interaction.options.getString('state');
     const pauseRequest = pauseState === PAUSE_REQUEST_VALUE;
     const resumeRequest = pauseState === RESUME_REQUEST_VALUE;
@@ -53,13 +54,12 @@ export default {
 
     if (start !== null || end !== null) SettingsRepository.save();
 
-    const l = interaction.locale;
     const settings = SettingsRepository.current;
     const response = [
-      `**${t(l, 'pause')}**`,
-      `${t(l, 'pause-state')}: ${pauseRequest ? t(l, 'pause-paused') : t(l, 'pause-resumed')}`,
-      `${t(l, 'pause-start')}: ${settings.pauseHourStart}`,
-      `${t(l, 'pause-end')}: ${settings.pauseHourEnd}`
+      `**${t('pause')}**`,
+      `${t('pause-state')}: ${pauseRequest ? t('pause-paused') : t('pause-resumed')}`,
+      `${t('pause-start')}: ${settings.pauseHourStart}`,
+      `${t('pause-end')}: ${settings.pauseHourEnd}`
     ];
 
     await interaction.reply({

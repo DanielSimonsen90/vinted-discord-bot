@@ -1,6 +1,7 @@
 import fs from 'fs';
 import path from 'path';
-import Logger from './logger.js';
+import Logger from '../utils/logger.js';
+import { Locale } from 'discord.js';
 
 const __dirname = path.resolve();
 
@@ -37,6 +38,52 @@ class LanguageService {
     }
 
     return `Missing translation for "${key}"`;
+  }
+
+  /**
+   * 
+   * @param {Locale} locale 
+   */
+  constructor(locale) {
+    this.locale = locale;
+
+    this.t = this.t.bind(this);
+    this.tWithIcon = this.tWithIcon.bind(this);
+  }
+
+  /**
+   * @param {string} key
+   * @param {Record<string, string> | undefined} values
+   */
+  t(key, values = {}) {
+    try {
+      const template = LanguageService.getText(this.locale, key);
+      return this.formatString(template, values);
+    } catch (error) {
+      console.error(error);
+      return `Missing translation for "${key}" in "${this.locale}"`;
+    }
+  }
+
+  /**
+ * @param {string} key 
+ * @param {string} icon 
+ * @param {Record<string, string> | undefined} values 
+ */
+  tWithIcon(key, icon, values = {}) {
+    return `${icon} ${this.t(key, values)}`;
+  }
+
+  /**
+   * @private
+   * @param {string} template string template
+   * @param {object} values Value keys to replace with the actual values
+   * @returns {string} The formatted string
+   */
+  formatString(template, values) {
+    return template.replace(/{(\w+)}/g, (_, placeholder) => (
+      values[placeholder] !== undefined ? values[placeholder] : `{${placeholder}}`
+    ));
   }
 }
 

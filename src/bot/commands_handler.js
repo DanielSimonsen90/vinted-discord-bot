@@ -4,7 +4,7 @@ import fs from 'fs';
 import path from 'path';
 import { fileURLToPath } from 'url';
 import Logger from '../utils/logger.js';
-import ConfigurationManager from '../utils/config_manager.js';
+import ConfigurationManager from '../managers/config_manager.js';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const { commandChannelId, token, clientId, guildId } = ConfigurationManager.getDiscordConfig;

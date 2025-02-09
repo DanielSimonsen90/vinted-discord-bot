@@ -1,7 +1,7 @@
 import { SlashCommandSubcommandBuilder } from 'discord.js';
 import { sendErrorEmbed, sendWaitingEmbed, createBaseEmbed } from "../../components/base_embeds.js";
-import * as crud from '../../../crud.js';
-import t from '../../../t.js';
+import * as crud from '../../../database/crud.js';
+import LanguageService from '../../../services/language_service.js';
 
 export default {
   data: new SlashCommandSubcommandBuilder()
@@ -9,17 +9,18 @@ export default {
     .setDescription("Delete all private monitoring channels. Only usable by admins."),
 
   execute: async (interaction) => {
+    const { t } = new LanguageService(interaction.locale);
+
     try {
-      const l = interaction.locale;
-      await sendWaitingEmbed(interaction, t(l, 'all-private-channels-deleted'));
+      await sendWaitingEmbed(interaction, t('all-private-channels-deleted'));
 
       // Check if the user is an admin
       const isAdmin = await crud.isUserAdmin(interaction);
-      if (!isAdmin) return sendErrorEmbed(interaction, t(l, 'admin-only-command'));
+      if (!isAdmin) return sendErrorEmbed(interaction, t('admin-only-command'));
 
       // Fetch all private Vinted channels
       const channels = crud.getAllPrivateVintedChannels();
-      if (channels.length === 0) return sendErrorEmbed(interaction, t(l, 'no-private-channels-found'));
+      if (channels.length === 0) return sendErrorEmbed(interaction, t('no-private-channels-found'));
 
       // Loop through each private channel and delete it with a delay
       for (const channel of channels) {
@@ -36,8 +37,8 @@ export default {
         // Send a message for each channel deleted
         const embed = await createBaseEmbed(
           interaction,
-          t(l, 'private-channel-deleted'),
-          t(l, 'private-channel-deleted-success', { channelId: channel.channelId }),
+          t('private-channel-deleted'),
+          t('private-channel-deleted-success', { channelId: channel.channelId }),
           0xFF0000
         );
 
@@ -47,8 +48,8 @@ export default {
 
       const finalEmbed = await createBaseEmbed(
         interaction,
-        t(l, 'all-private-channels-deleted'),
-        t(l, 'all-private-channels-deleted-success'),
+        t('all-private-channels-deleted'),
+        t('all-private-channels-deleted-success'),
         0xFF0000
       );
 
@@ -56,7 +57,7 @@ export default {
 
     } catch (error) {
       console.error('Error deleting all private channels:', error);
-      await sendErrorEmbed(interaction, t(l, 'all-private-channels-deleted-error', { error }));
+      await sendErrorEmbed(interaction, t('all-private-channels-deleted-error', { error }));
     }
   }
 };

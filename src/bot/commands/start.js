@@ -1,8 +1,7 @@
 import { ActionRowBuilder, CommandInteraction, ModalBuilder, SlashCommandBuilder, TextInputBuilder, TextInputStyle } from "discord.js";
 import { validateUrl, urlContainsSearchTextParameter, getDomainInUrl } from '../../services/url_service.js';
-import t from "../../t.js";
 import { createBaseEmbed, sendWaitingEmbed, sendErrorEmbed, sendWarningEmbed } from "../components/base_embeds.js";
-import * as crud from '../../crud.js';
+import * as crud from '../../database/crud.js';
 import { Preference, ShippableMap, UserRepository } from '../../database/index.js';
 
 const URL_KEY = "url";
@@ -26,18 +25,20 @@ export default {
    */
   execute: async (interaction) => {
     const { channelId, user: { id: discordId }, locale: l } = interaction;
+    const { t } = new LanguageService(l);
+    
     const [url, bannedWordsString] = await ensureUrl(interaction);
     const bannedKeywords = bannedWordsString ? bannedWordsString.split(',').map(word => word.trim()) : [];
 
     const validation = validateUrl(url);
-    if (!validation) return sendErrorEmbed(interaction, t(l, validation));
+    if (!validation) return sendErrorEmbed(interaction, t(validation));
 
     try {
-      await sendWaitingEmbed(interaction, t(l, 'creating-public-channel'));
+      await sendWaitingEmbed(interaction, t('creating-public-channel'));
 
       const isUserAdmin = await crud.isUserAdmin(interaction);
-      if (!isUserAdmin) return sendErrorEmbed(interaction, t(l, 'not-allowed-to-create-public-channel'));
-      else if (urlContainsSearchTextParameter(url)) await sendWarningEmbed(interaction, t(l, 'url-contains-search-text'));
+      if (!isUserAdmin) return sendErrorEmbed(interaction, t('not-allowed-to-create-public-channel'));
+      else if (urlContainsSearchTextParameter(url)) await sendWarningEmbed(interaction, t('url-contains-search-text'));
 
       // Ensure user object
       const user = await crud.getOrCreateUserByDiscordId(discordId);
@@ -53,8 +54,8 @@ export default {
 
       const embed = await createBaseEmbed(
         interaction,
-        t(l, 'monitoring-started'),
-        t(l, 'monitoring-has-been-started', { url }),
+        t('monitoring-started'),
+        t('monitoring-has-been-started', { url }),
         0x00FF00
       );
 
@@ -66,7 +67,7 @@ export default {
       await interaction.editReply({ embeds: [embed] });
     } catch (error) {
       console.error('Error creating public channel:', error);
-      await sendErrorEmbed(interaction, t(l, 'creating-public-channel-error', { error }));
+      await sendErrorEmbed(interaction, t('creating-public-channel-error', { error }));
     }
   }
 };
@@ -76,7 +77,7 @@ export default {
  * @returns {Promise<[url: string, bannedWords?: string]>}
  */
 async function ensureUrl(interaction) {
-  const l = interaction.locale;
+  const { t } = new LanguageService(interaction.locale);
   const urlOption = interaction.options.getString(URL_KEY);
   const bannedWordsOption = interaction.options.getString(BANNED_WORDS_KEY);
   if (urlOption) return [urlOption, bannedWordsOption];
@@ -87,19 +88,19 @@ async function ensureUrl(interaction) {
 
   interaction.showModal(new ModalBuilder()
     .setCustomId(modalId)
-    .setTitle(t(l, 'start-modal-title'))
+    .setTitle(t('start-modal-title'))
     .addComponents(
       new ActionRowBuilder().addComponents(
         new TextInputBuilder()
           .setCustomId(urlInputId)
-          .setLabel(t(l, 'start-modal-url-label'))
+          .setLabel(t('start-modal-url-label'))
           .setStyle(TextInputStyle.Short)
           .setRequired(true)
-          .setPlaceholder(t(l, 'start-modal-url-placeholder')),
+          .setPlaceholder(t('start-modal-url-placeholder')),
       new ActionRowBuilder().addComponents(
         new TextInputBuilder()
           .setCustomId(bannedWordsId)
-          .setLabel(t(l, 'start-modal-banned-words-label'))
+          .setLabel(t('start-modal-banned-words-label'))
           .setStyle(TextInputStyle.Paragraph)
           .setRequired(false)
       )

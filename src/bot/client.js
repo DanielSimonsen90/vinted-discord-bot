@@ -1,10 +1,10 @@
 import { IntentsBitField, Client, GatewayIntentBits, ActivityType } from 'discord.js';
-import { registerCommands, handleCommands } from './bot/commands_handler.js';
-import ConfigurationManager from './utils/config_manager.js';
-import Logger from './utils/logger.js';
-import * as crud from './crud.js';
+import { registerCommands, handleCommands } from './commands_handler.js';
+import ConfigurationManager from '../managers/config_manager.js';
+import Logger from '../utils/logger.js';
+import * as crud from '../database/crud.js';
 
-import subToPushes from './mikkel-resell/sub-to-pushes.js';
+import subToPushes from '../mikkel-resell/sub-to-pushes.js';
 
 const client = new Client({
   intents: [

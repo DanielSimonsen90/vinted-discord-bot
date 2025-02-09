@@ -1,8 +1,8 @@
 import { ContextMenuCommandBuilder, ApplicationCommandType, UserContextMenuCommandInteraction } from "discord.js";
 import { createBaseEmbed, sendErrorEmbed, sendWaitingEmbed } from "../../components/base_embeds.js";
-import * as crud from '../../../crud.js';
-import t from "../../../t.js";
+import * as crud from '../../../database/crud.js';
 import { Preference } from "../../../database/index.js";
+import LanguageService from "../../../services/language_service.js";
 
 export default {
   data: new ContextMenuCommandBuilder()
@@ -13,17 +13,18 @@ export default {
    * @param {UserContextMenuCommandInteraction} interaction 
    */
   execute: async (interaction) => {
+    const { t } = new LanguageService(interaction.locale);
+    
     try {
-      const l = interaction.locale;
-      await sendWaitingEmbed(interaction, t(l, 'please-wait'));
+      await sendWaitingEmbed(interaction, t('please-wait'));
   
       const user = await crud.getUserByDiscordId(interaction.targetUser.id);
-      if (!user) return sendErrorEmbed(interaction, t(l, 'user-not-found'));
+      if (!user) return sendErrorEmbed(interaction, t('user-not-found'));
   
       const embed = await createBaseEmbed(
         interaction,
-        t(l, 'user-info'),
-        t(l, 'user-info-success'),
+        t('user-info'),
+        t('user-info-success'),
         0x00FF00
       );
   
@@ -33,10 +34,10 @@ export default {
         ? interaction.targetMember.avatarURL() 
         : interaction.targetUser.displayAvatarURL()
       ).setFields([
-        { name: `${t(l, 'user-id')}`, value: `${user.id} ` },
-        { name: `${t(l, 'max-channels')}`, value: `${userNumberOfChannels} / ${user.maxChannels} `, inline: true },
-        { name: `${t(l, 'country-whitelist')}`, value: `${user.preferences[Preference.Countries] || []} `, inline: true },
-        { name: `${t(l, 'user-mentions')}`, value: `${user.preferences[Preference.Mention] || false} `, inline: true }
+        { name: `${t('user-id')}`, value: `${user.id} ` },
+        { name: `${t('max-channels')}`, value: `${userNumberOfChannels} / ${user.maxChannels} `, inline: true },
+        { name: `${t('country-whitelist')}`, value: `${user.preferences[Preference.Countries] || []} `, inline: true },
+        { name: `${t('user-mentions')}`, value: `${user.preferences[Preference.Mention] || false} `, inline: true }
       ]);
   
       await interaction.editReply({ embeds: [embed] });

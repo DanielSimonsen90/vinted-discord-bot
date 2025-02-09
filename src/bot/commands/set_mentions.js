@@ -1,8 +1,8 @@
 import { SlashCommandBuilder, StringSelectMenuBuilder, ActionRowBuilder } from 'discord.js';
 import { sendErrorEmbed, sendWaitingEmbed } from '../components/base_embeds.js';
-import * as crud from '../../crud.js';
+import * as crud from '../../database/crud.js';
 import { Preference } from '../../database/index.js';
-import t from '../../t.js';
+import LanguageService from '../../services/language_service.js';
 
 export default {
   data: new SlashCommandBuilder()
@@ -18,9 +18,10 @@ export default {
         )),
 
   execute: async (interaction) => {
+    const { t } = new LanguageService(interaction.locale);
+    
     try {
-      const l = interaction.locale;
-      await sendWaitingEmbed(interaction, t(l, 'updating-mentions'));
+      await sendWaitingEmbed(interaction, t('updating-mentions'));
 
       const state = interaction.options.getString('state');
       const discordId = interaction.user.id;
@@ -30,12 +31,12 @@ export default {
       const user = await crud.getUserByDiscordId(discordId);
       const channels = user.channels;
 
-      if (channels.length === 0) return sendErrorEmbed(interaction, t(l, 'no-channels-found'));
+      if (channels.length === 0) return sendErrorEmbed(interaction, t('no-channels-found'));
 
       // Create a select menu for channel selection
       const channelMenu = new StringSelectMenuBuilder()
         .setCustomId('channel_select' + discordId)
-        .setPlaceholder(t(l, 'mentions-select-channel'))
+        .setPlaceholder(t('mentions-select-channel'))
         .addOptions(channels.map(channel => ({
           label: channel.name,
           value: channel.channelId
@@ -43,7 +44,7 @@ export default {
 
       const row = new ActionRowBuilder().addComponents(channelMenu);
       await interaction.followUp({
-        content: t(l, 'select-channel-for-mentions'),
+        content: t('select-channel-for-mentions'),
         components: [row],
         ephemeral: true,
       });
@@ -62,7 +63,7 @@ export default {
 
         // remove the select menu
         await channelInteraction.update({
-          content: t(l, `mentions-update-${status}`),
+          content: t(`mentions-update-${status}`),
           components: [],
         });
 
@@ -71,7 +72,7 @@ export default {
 
     } catch (error) {
       console.error(`Error updating mentions:`, error);
-      await sendErrorEmbed(interaction, t(l, 'mentions-update-error', { error }));
+      await sendErrorEmbed(interaction, t('mentions-update-error', { error }));
     }
   }
 }

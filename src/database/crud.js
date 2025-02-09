@@ -3,10 +3,9 @@ import {
   UserRepository, VintedChannelRepository,
   REPOS,
   SchemaCollection
-} from "./database/index.js";
-import EventEmitter from "./utils/event_emitter.js";
-
-import ConfigurationManager from "./utils/config_manager.js";
+} from "./index.js";
+import EventEmitter from "../utils/event_emitter.js";
+import ConfigurationManager from "../managers/config_manager.js";
 
 const userDefaultConfig = ConfigurationManager.getUserConfig;
 const discordAdminIds = ConfigurationManager.getDiscordConfig.adminRoleIds;

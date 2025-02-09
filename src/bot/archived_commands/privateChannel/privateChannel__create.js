@@ -1,9 +1,9 @@
 import { SlashCommandSubcommandBuilder } from "discord.js";
 import { createBaseEmbed, sendErrorEmbed, sendWaitingEmbed } from "../../components/base_embeds.js";
-import * as crud from '../../../crud.js';
+import * as crud from '../../../database/crud.js';
 import { createPrivateThread } from "../../../services/discord_service.js";
-import t from '../../../t.js';
-import ConfigurationManager from "../../../utils/config_manager.js";
+import ConfigurationManager from "../../../managers/config_manager.js";
+import LanguageService from "../../../services/language_service.js";
 
 const allowUserToCreatePrivateChannels = ConfigurationManager.getPermissionConfig.allow_user_to_create_private_channels;
 
@@ -17,15 +17,16 @@ export default {
         .setRequired(true)),
 
   execute: async (interaction) => {
+    const { t } = new LanguageService(interaction.locale);
+
     try {
-      const l = interaction.locale;
-      await sendWaitingEmbed(interaction, t(l, 'creating-private-channel'));
+      await sendWaitingEmbed(interaction, t('creating-private-channel'));
 
       const channelName = interaction.options.getString('channel_name');
       const isUserAdmin = crud.isUserAdmin(interaction);
 
       if (!allowUserToCreatePrivateChannels && !isUserAdmin) {
-        return sendErrorEmbed(interaction, t(l, 'not-allowed-to-create-private-channel'));
+        return sendErrorEmbed(interaction, t('not-allowed-to-create-private-channel'));
       }
 
       const discordId = interaction.user.id;
@@ -34,7 +35,7 @@ export default {
       let user = await crud.getUserByDiscordId(discordId);
 
       if (user.channels.length >= user.maxChannels) {
-        return sendErrorEmbed(interaction, t(l, 'channel-limit-exceeded', { limit: user.maxChannels }));
+        return sendErrorEmbed(interaction, t('channel-limit-exceeded', { limit: user.maxChannels }));
       }
 
       // Create the private channel
@@ -56,8 +57,8 @@ export default {
 
       const embed = await createBaseEmbed(
         interaction,
-        t(l, 'private-channel-created'),
-        t(l, 'private-channel-created-success', { channelName: `<#${channelId}>` }),
+        t('private-channel-created'),
+        t('private-channel-created-success', { channelName: `<#${channelId}>` }),
         0x00FF00
       );
 
@@ -65,10 +66,10 @@ export default {
 
       // Send a message in the private channel
       const privateChannelObj = await interaction.guild.channels.cache.get(channelId);
-      await privateChannelObj.send(t(l, 'private-channel-welcome', { user: `<@${discordId}>` }));
+      await privateChannelObj.send(t('private-channel-welcome', { user: `<@${discordId}>` }));
     } catch (error) {
       console.error('Error creating private channel:', error);
-      await sendErrorEmbed(interaction, t(l, 'private-channel-created-error', { error }));
+      await sendErrorEmbed(interaction, t('private-channel-created-error', { error }));
     }
   }
 };

@@ -3,7 +3,7 @@ import Fuse from 'fuse.js'; // Import Fuse.js
 
 import Logger from '../utils/logger.js';
 import { isSubcategory } from '../database/index.js';
-import ConfigurationManager from '../utils/config_manager.js';
+import ConfigurationManager from '../managers/config_manager.js';
 
 const blacklisted_countries_codes = ConfigurationManager.getAlgorithmSetting.blacklistedCountryCodes;
 

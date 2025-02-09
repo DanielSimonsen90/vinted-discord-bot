@@ -1,9 +1,9 @@
 import { SlashCommandSubcommandBuilder } from "discord.js";
 import { createBaseEmbed, sendErrorEmbed, sendWaitingEmbed, sendWarningEmbed } from '../../components/base_embeds.js';
-import * as crud from '../../../crud.js';
-import t from '../../../t.js';
+import * as crud from '../../../database/crud.js';
 import { Preference, ShippableMap } from '../../../database/index.js';
 import { validateUrl, urlContainsSearchTextParameter, getDomainInUrl } from "../../../services/url_service.js";
+import LanguageService from "../../../services/language_service.js";
 
 export default {
   data: new SlashCommandSubcommandBuilder()
@@ -19,8 +19,8 @@ export default {
         .setRequired(false)),
 
   execute: async (interaction) => {
-    const l = interaction.locale;
-    await sendWaitingEmbed(interaction, t(l, 'starting-monitoring'));
+    const { t } = new LanguageService(interaction.locale);
+    await sendWaitingEmbed(interaction, t('starting-monitoring'));
 
     const discordId = interaction.user.id;
     const channelId = interaction.channel.id;
@@ -31,27 +31,27 @@ export default {
 
     // validate the URL
     const validation = validateUrl(url);
-    if (!validation) return sendErrorEmbed(interaction, t(l, validation));
+    if (!validation) return sendErrorEmbed(interaction, t(validation));
 
     try {
       // Get the user
       const user = await crud.getUserByDiscordId(discordId);
-      if (!user) return sendErrorEmbed(interaction, t(l, 'user-not-found'));
+      if (!user) return sendErrorEmbed(interaction, t('user-not-found'));
 
       // Find the VintedChannel by channelId and ensure it's owned by the user
       const vintedChannel = user.channels.find(channel => channel.channelId === channelId && channel.user === user.id);
-      if (!vintedChannel) return sendErrorEmbed(interaction, t(l, 'channel-not-found-nor-owned'));
+      if (!vintedChannel) return sendErrorEmbed(interaction, t('channel-not-found-nor-owned'));
 
       // Check if URL is provided or present in the VintedChannel
-      if (!url && !vintedChannel.url) return sendErrorEmbed(interaction, t(l, 'provide-vaild-url') + " " + t(l, url));
+      if (!url && !vintedChannel.url) return sendErrorEmbed(interaction, t('provide-vaild-url') + " " + t(url));
 
       // Check if the URL contains the search_text parameter
-      if (urlContainsSearchTextParameter(url)) await sendWarningEmbed(interaction, t(l, 'url-contains-search-text'));
+      if (urlContainsSearchTextParameter(url)) await sendWarningEmbed(interaction, t('url-contains-search-text'));
 
       const embed = await createBaseEmbed(
         interaction,
-        t(l, 'monitoring-started'),
-        t(l, 'monitoring-has-been-started', { url: url || vintedChannel.url }),
+        t('monitoring-started'),
+        t('monitoring-has-been-started', { url: url || vintedChannel.url }),
         0x00FF00
       );
 
@@ -67,7 +67,7 @@ export default {
       await crud.startVintedChannelMonitoring(vintedChannel.id, url);
     } catch (error) {
       console.error('Error starting monitoring session:', error);
-      await sendErrorEmbed(interaction, t(l, 'monitoring-start-error', { error }));
+      await sendErrorEmbed(interaction, t('monitoring-start-error', { error }));
     }
   }
 }

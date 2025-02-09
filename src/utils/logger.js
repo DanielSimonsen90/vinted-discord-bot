@@ -2,7 +2,7 @@ import fs from 'fs';
 import path from 'path';
 import chalk from 'chalk';
 
-import ConfigurationManager from './config_manager.js';
+import ConfigurationManager from '../managers/config_manager.js';
 
 const devMode = ConfigurationManager.getDevMode;
 const dumpLogs = ConfigurationManager.getDumpLogs;

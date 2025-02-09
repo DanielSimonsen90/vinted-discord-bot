@@ -1,8 +1,8 @@
 import fs from 'fs';
 import { SocksProxyAgent } from 'socks-proxy-agent';
 
-import Logger from './logger.js';
-import { listProxies, Proxy } from './proxies.js';
+import Logger from '../utils/logger.js';
+import { listProxies, Proxy } from '../utils/proxies.js';
 import ConfigurationManager from './config_manager.js';
 
 const proxy_settings = ConfigurationManager.getProxiesConfig;
