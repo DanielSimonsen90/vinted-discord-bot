@@ -270,6 +270,7 @@ async function findHighestIDUntilSuccessful(cookie) {
     } catch (error) {
       // If an error occurs, log a message and retry
       Logger.error("Error fetching highest ID, retrying...");
+      await new Promise(res => setTimeout(res, 1000));
     }
   }
 }

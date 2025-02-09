@@ -78,7 +78,7 @@ export async function getUserById(id) {
  * @param {string} discordId - The Discord ID.
  * @returns {Promise<User>} - The user.
  */
-export async function getUserByDiscordId(discordId) {
+export async function getOrCreateUserByDiscordId(discordId) {
   return UserRepository.findOne({ discordId })?.populate({
     property: 'channels',
     repo: VintedChannelRepository
@@ -105,7 +105,7 @@ export async function updateUser(id, { preferences, channels, lastUpdated, timeM
  * @returns {Promise<User>} - The updated user.
  */
 export async function setUserMaxChannels(discordId, maxChannels) {
-  const user = await getUserByDiscordId(discordId);
+  const user = await getOrCreateUserByDiscordId(discordId);
   if (!user) throw new Error('User not found');
 
   user.maxChannels = maxChannels;
@@ -142,12 +142,13 @@ export async function checkUserExists(discordId) {
  */
 export async function setPreferenceKey(repo, idKey, idValue, key, value) {
   const query = { [idKey]: idValue };
-  const entity = repo.findOne(query);
+  const entities = repo.find(query);
 
-  if (entity && 'preferences' in entity) {
-    // entity.preferences.set(key, value);
-    entity.preferences[key] = value;
-    repo.findByIdAndUpdate(entity.id, entity);
+  if (entities?.length && entities.some(entity => 'preferences' in entity)) {
+    entities.forEach(entity => {
+      entity.preferences[key] = value;
+      repo.findByIdAndUpdate(entity.id, entity);
+    });
     repo.save();
   }
 
@@ -221,7 +222,7 @@ export async function removeFromPreferenceKey(repo, idKey, idValue, key, value) 
  * @param {any} value 
  */
 export async function setUserPreference(discordId, key, value) {
-  const user = await getUserByDiscordId(discordId);
+  const user = await getOrCreateUserByDiscordId(discordId);
 
   return user
     ? setPreferenceKey(UserRepository, 'discordId', discordId, key, value)
@@ -229,7 +230,7 @@ export async function setUserPreference(discordId, key, value) {
 }
 
 export async function addUserPreference(discordId, key, value) {
-  const user = await getUserByDiscordId(discordId);
+  const user = await getOrCreateUserByDiscordId(discordId);
 
   return user
     ? addToPreferenceKey(UserRepository, 'discordId', discordId, key, value)
@@ -237,7 +238,7 @@ export async function addUserPreference(discordId, key, value) {
 }
 
 export async function removeUserPreference(discordId, key, value) {
-  const user = await getUserByDiscordId(discordId);
+  const user = await getOrCreateUserByDiscordId(discordId);
 
   return user
     ? removeFromPreferenceKey(UserRepository, 'discordId', discordId, key, value)
@@ -288,12 +289,13 @@ export function createVintedChannel({
   channelId, name,
   lastUpdated = new Date(), url = null,
   isMonitoring = true, type = 'public',
-  user = null, preferences = new Map()
+  user = null, preferences = new Map(),
+  bannedKeywords = [],
 }) {
   const result = VintedChannelRepository.addOne(new VintedChannel({
     channelId, lastUpdated, name,
     url, isMonitoring, type, user,
-    preferences
+    preferences, bannedKeywords
   }));
   VintedChannelRepository.save();
   eventEmitter.emit('updated');
@@ -383,7 +385,7 @@ export async function getAllMonitoredVintedChannelsBrandMap() {
 }
 
 export async function getAllVintedChannelsByDiscordId(discordId) {
-  const user = await getUserByDiscordId(discordId);
+  const user = await getOrCreateUserByDiscordId(discordId);
   return VintedChannelRepository.find({ user: user.discordId })?.populate({
     property: 'user',
     repo: UserRepository
@@ -504,7 +506,7 @@ export async function removeChannelFromUser(userId, channelId) {
 }
 
 export async function removeChannelFromUserByIds(discordId, channelId) {
-  const user = await getUserByDiscordId(discordId);
+  const user = await getOrCreateUserByDiscordId(discordId);
   if (user) {
     user.channels = user.channels.filter(c =>
       typeof c === 'string' ? c !== channelId

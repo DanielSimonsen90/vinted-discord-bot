@@ -3,7 +3,7 @@ import { validateUrl, urlContainsSearchTextParameter, getDomainInUrl } from '../
 import t from "../../t.js";
 import { createBaseEmbed, sendWaitingEmbed, sendErrorEmbed, sendWarningEmbed } from "../components/base_embeds.js";
 import * as crud from '../../crud.js';
-import { Preference, ShippableMap } from '../../database/index.js';
+import { Preference, ShippableMap, UserRepository } from '../../database/index.js';
 
 const URL_KEY = "url";
 const BANNED_WORDS_KEY = "bannede_ord";
@@ -39,12 +39,15 @@ export default {
       if (!isUserAdmin) return sendErrorEmbed(interaction, t(l, 'not-allowed-to-create-public-channel'));
       else if (urlContainsSearchTextParameter(url)) await sendWarningEmbed(interaction, t(l, 'url-contains-search-text'));
 
+      // Ensure user object
+      const user = await crud.getOrCreateUserByDiscordId(discordId);
+
       // Create the VintedChannel
       await crud.createVintedChannel({
         channelId, url,
         isMonitoring: true,
         type: 'public',
-        user: discordId,
+        user: user.discordId,
         bannedKeywords
       });
 
@@ -56,7 +59,10 @@ export default {
       );
 
       const domain = getDomainInUrl(url);
+      // VintedChannelRepository, used in setVintedChannelPreference, saves any loose data in this call
       await crud.setVintedChannelPreference(channelId, Preference.Countries, [...ShippableMap[domain], domain]);
+      UserRepository.save();
+
       await interaction.editReply({ embeds: [embed] });
     } catch (error) {
       console.error('Error creating public channel:', error);

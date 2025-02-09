@@ -12,7 +12,7 @@ function formatString(template, values) {
  * @param {string} key 
  * @param {Record<string, string> | undefined} values 
  */
-function t(lang, key, values = {}) {
+export function t(lang, key, values = {}) {
   try {
     const template = LanguageService.getText(lang, key);
     return formatString(template, values);

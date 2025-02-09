@@ -23,7 +23,7 @@ class ConfigurationManager {
     guildId: process.env.DISCORD_GUILD_ID,
     threadChannelId: process.env.DISCORD_THREAD_CHANNEL_ID,
     commandChannelId: process.env.DISCORD_COMMAND_CHANNEL_ID,
-    channelInactivityEnabled: process.env.ENABLE_CHANNEL_INACTIVITY === 1,
+    channelInactivityEnabled: process.env.ENABLE_CHANNEL_INACTIVITY == 1,
     channelInactivityHours: process.env.CHANNEL_INACTIVITY_HOURS,
     channelInactivityDeleteHours: process.env.CHANNEL_INACTIVITY_DELETE_HOURS,
   };
@@ -37,7 +37,7 @@ class ConfigurationManager {
   };
 
   static getPermissionConfig = {
-    allowUserToCreatePrivateChannels: process.env.ALLOW_USER_TO_CREATE_PRIVATE_CHANNELS === 1
+    allowUserToCreatePrivateChannels: process.env.ALLOW_USER_TO_CREATE_PRIVATE_CHANNELS == 1
   };
 
   /**
@@ -46,7 +46,7 @@ class ConfigurationManager {
    */
   static getAlgorithmSetting = {
     vintedApiDomainExtension: process.env.VINTED_API_DOMAIN_EXTENSION,
-    filterZeroStarsProfiles: process.env.ALGORITHM_FILTER_ZERO_STARS_PROFILES === 1,
+    filterZeroStarsProfiles: process.env.ALGORITHM_FILTER_ZERO_STARS_PROFILES == 1,
     concurrentRequests: process.env.ALGORITHM_CONCURRENT_REQUESTS,
     blacklistedCountryCodes: process.env.BLACKLISTED_COUNTRIES_CODES.split(',') || []
   };
@@ -56,12 +56,12 @@ class ConfigurationManager {
    * @returns {Array} Array of proxy configurations.
    */
   static getProxiesConfig = {
-    useWebshare: process.env.USE_WEBSHARE === 1,
+    useWebshare: process.env.USE_WEBSHARE == 1,
     webshareApiKey: process.env.WEBSHARE_API_KEY,
   };
 
-  static getDevMode = process.env.DEV_MODE === 1
-  static getDumpLogs = process.env.DUMP_LOGS === 1
+  static getDevMode = process.env.DEV_MODE == 1
+  static getDumpLogs = process.env.DUMP_LOGS == 1
 }
 
 export default ConfigurationManager;

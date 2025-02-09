@@ -18,9 +18,8 @@
   "version": "1.0.0",
   "main": "main.js",
   "scripts": {
-    "start": "node --max-old-space-size=4096 main.js",
-    "dev": "nodemon --max-old-space-size=4096 main.js",
-    "init": "node init.js",
+    "start": "node main.js --ignore ./data/",
+    "dev": "nodemon main.js --ignore ./data/",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "author": "",

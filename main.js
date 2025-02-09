@@ -53,6 +53,7 @@ const token = discordConfig.token;
 Logger.info('Fetching cookie from Vinted');
 
 var cookie = await refreshCookie();
+// client.channels.cache.get(process.env.DISCORD_THREAD_CHANNEL_ID).send("Vinted cookie fetched. Monitoring will now start...");
 
 setInterval(async () => {
   try {
@@ -126,8 +127,8 @@ const monitorChannels = () => {
 
     if (item.getNumericStars() === 0 && algorithmSettings.filterZeroStarsProfiles) return;
 
-    let rawItemBrandId = item.brandId;
-    rawItemBrandId = rawItemBrandId ? rawItemBrandId.toString() : null;
+    const rawItemBrandId = item.brandId ? item.brandId.toString() : null;
+    Logger.debug(`[${item.brandId}] ${item.brand}`);
 
     if (allMonitoringChannelsBrandMap.has(rawItemBrandId)) {
       const brandChannels = allMonitoringChannelsBrandMap.get(rawItemBrandId);
@@ -157,7 +158,7 @@ const monitorChannels = () => {
       try {
         await CatalogService.fetchUntilCurrentAutomatic(cookie, handleItem);
       } catch (error) {
-        console.error(error);
+        Logger.error(error);
       }
     }
   })();

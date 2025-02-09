@@ -14,8 +14,20 @@ const extension = ConfigurationManager.getAlgorithmSetting.vintedApiDomainExtens
 export async function fetchCookie() {
   return await executeWithDetailedHandling(async () => {
     const url = `https://www.vinted.${extension}`;
-    const response = await RequestBuilder.get(url).setNextProxy().send();
-    // const response = await RequestBuilder.get(url).send();
+    const response = await (async () => {
+      return RequestBuilder.get(url).setNextProxy().send();
+      // try {
+      //   const response = await RequestBuilder.get(url).setNextProxy().send();
+  
+      //   // If proxies can't be used, retry without it
+      //   return response?.status === 200
+      //     ? response
+      //     : RequestBuilder.get(url).send();
+      // } catch (error) {
+      //   if (error.name === "AxiosError" && error.status === 403) return RequestBuilder.get(url).send(); 
+      //   throw error;
+      // }
+    })();
 
     if (response?.headers['set-cookie']) {
       const cookies = response.headers['set-cookie'];
@@ -25,8 +37,8 @@ export async function fetchCookie() {
         Logger.debug(`Fetched cookie: ${cookie}`);
 
         return { cookie };
-      } 
-      
+      }
+
       throw new Error("Session cookie not found in the headers.");
     }
 

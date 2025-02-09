@@ -12,6 +12,12 @@
     "send-message": "Send message",
     "buy": "Buy",
 
+    "Very good": "Very good",
+    "New with tags": "New with tags",
+    "New without tags": "New without tags",
+    "Good": "Good",
+    "Satisfactory": "Satisfactory",
+
     "enabled": "Enabled",
     "disabled": "Disabled",
 
