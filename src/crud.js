@@ -153,7 +153,7 @@ export async function setPreferenceKey(repo, idKey, idValue, key, value) {
   }
 
   eventEmitter.emit('updated');
-  return entity;
+  return entities;
 }
 
 /**
