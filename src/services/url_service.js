@@ -44,8 +44,8 @@ function matchVintedItemToSearchParams(item, searchParams, bannedKeywords, count
   const isBlacklistedCountry = blacklisted_countries_codes.includes(item.user.countryCode);
   const isRegisteredCountry = countries_codes.length && countries_codes.includes(item.user.countryCode);
   if (isBlacklistedCountry || !isRegisteredCountry) {
-    if (isBlacklistedCountry) console.log('UK');
-    else console.log('Unknown country code: ' + item.user.countryCode)
+    if (isBlacklistedCountry) console.log('Blacklisted country, ' + item.user.countryCode);
+    else console.log('Outisde of countries_codes scope, ' + item.user.countryCode);
     return false;
   }
 
@@ -101,12 +101,11 @@ function matchVintedItemToSearchParams(item, searchParams, bannedKeywords, count
   ].map(([key, value]) => [key, item[value]]));
 
   for (const [key, value] of searchParamsMap) {
-    if (searchParams[key] !== undefined && searchParams[key] !== null) {
-      const checkOne = Array.isArray(searchParams[key]) && searchParams[key].length > 0 && !searchParams[key].includes(value.toString());
-      const checkTwo = Array.isArray(searchParams[key]) 
-        ? searchParams[key].some(v => v !== value?.toString()) 
-        : searchParams[key] !== value?.toString();
-      if (checkOne || checkTwo) return false;
+    if (searchParams[key] === undefined || searchParams[key] === null) continue;
+    if (Array.isArray(searchParams[key])) {
+      if (searchParams[key].length > 0 && !searchParams[key].includes(value.toString())) return false;
+    } else {
+      if (searchParams[key] !== value.toString()) return false;
     }
   }
 
@@ -127,7 +126,7 @@ const VALID_BASE_URL = "catalog";
 // validate that the URL is a Vinted catalog URL with at least one query parameter
 export function validateUrl(url) {
   if (!url) return "invalid-url";
-  
+
   try {
     // check if the route is the valid base URL
     // https://www.vinted.fr/catalog?...

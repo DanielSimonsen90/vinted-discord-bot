@@ -33,7 +33,7 @@ class Logger {
   }
 
   static log(level, message, colorFn, includeSource = false) {
-    const timestamp = new Date().toISOString();
+    const timestamp = new Date().toLocaleTimeString();
     const formattedLevel = colorFn(`[${level}]`);
     let logMessage = `${timestamp} ${formattedLevel}: ${message}`;
 
