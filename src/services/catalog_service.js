@@ -257,6 +257,7 @@ function updateFetchedRange(itemID) {
  */
 async function findHighestIDUntilSuccessful(cookie) {
   // Loop until the highest ID is found
+  Logger.info("Fetching highest id...")
   while (currentID === 0) {
     try {
       // Fetch the highest ID
@@ -268,8 +269,6 @@ async function findHighestIDUntilSuccessful(cookie) {
         Logger.info(`Highest ID: ${currentID}`);
       }
     } catch (error) {
-      // If an error occurs, log a message and retry
-      Logger.error("Error fetching highest ID, retrying...");
       await new Promise(res => setTimeout(res, 1000));
     }
   }

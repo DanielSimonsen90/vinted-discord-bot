@@ -44,8 +44,8 @@ function matchVintedItemToSearchParams(item, searchParams, bannedKeywords, count
   const isBlacklistedCountry = blacklisted_countries_codes.includes(item.user.countryCode);
   const isRegisteredCountry = countries_codes.length && countries_codes.includes(item.user.countryCode);
   if (isBlacklistedCountry || !isRegisteredCountry) {
-    if (isBlacklistedCountry) console.log('Blacklisted country, ' + item.user.countryCode);
-    else console.log('Outisde of countries_codes scope, ' + item.user.countryCode);
+    if (isBlacklistedCountry) console.debug('Blacklisted country, ' + item.user.countryCode);
+    else console.debug('Outisde of countries_codes scope, ' + item.user.countryCode);
     return false;
   }
 
