@@ -18,24 +18,14 @@ const client = new Client({
 });
 
 const discordConfig = ConfigurationManager.getDiscordConfig;
-const devMode = ConfigurationManager.getDevMode;
 
 client.once('ready', async () => {
   Logger.info('Client is ready!');
   await registerCommands(client, discordConfig);
 
-  client.user.setPresence({
-    status: 'online',
-    activities: [{
-      name: devMode ? 'in dev mode' : 'Vinted',
-      type: ActivityType.Watching,
-    }],
-  });
+  if (!ConfigurationManager.getBotDevMode) subToPushes(client);
 
-  subToPushes(client);
-  
-  // Change presence to show number of channels being monitored
-  setInterval(async () => {
+  const setPresence = () => {
     const channelCount = crud.getAllVintedChannels().length ?? 0;
     client.user.setPresence({
       activities: [{
@@ -44,14 +34,16 @@ client.once('ready', async () => {
       }],
       status: 'online'
     });
-  }, 60000);
+  }
+
+  // Change presence to show number of channels being monitored
+  setPresence();
+  setInterval(setPresence, 60000);
 });
 
 
 client.on('interactionCreate', handleCommands);
 
-client.login(discordConfig.token).then((token) => {
-  Logger.info(`Logged in as ${client.user.tag}`);
-});
+client.login(discordConfig.token).then(() => Logger.info(`Logged in as ${client.user.username}`));
 
 export default client;

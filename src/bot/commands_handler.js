@@ -33,7 +33,6 @@ async function loadCommands() {
       }
     }
   }
-
 }
 
 export async function registerCommands() {

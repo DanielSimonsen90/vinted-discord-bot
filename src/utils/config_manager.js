@@ -61,6 +61,7 @@ class ConfigurationManager {
   };
 
   static getDevMode = process.env.DEV_MODE == 1
+  static getBotDevMode = process.env.BOT_DEV_MODE == 1
   static getDumpLogs = process.env.DUMP_LOGS == 1
 }
 
