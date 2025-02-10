@@ -1,62 +1,8 @@
-// Validation functions as standalone utilities
-function validateId(value) {
-  return (typeof value === 'number' && value > 0) ? value : 0;
-}
+import { validateId, validateNumber, validateString, validateUrl } from "../utils/validations.js";
+import { VintedPhoto } from "./VintedPhoto.js";
+import { VintedUser } from "./VintedUser.js";
 
-function validateNumber(value) {
-  return (typeof value === 'number') ? value : 0;
-}
-
-function validateString(value) {
-  return (typeof value === 'string') ? value : "N/A";
-}
-
-function validateBoolean(value) {
-  return (typeof value === 'boolean') ? value : false;
-}
-
-function validateUrl(value) {
-  try {
-    new URL(value);
-    return value;
-  } catch (error) {
-    return "N/A";
-  }
-}
-
-function parseDate(value) {
-  const parsedDate = new Date(value);
-  return isNaN(parsedDate.getTime()) ? new Date(0) : parsedDate;
-}
-
-// Classes using external validation functions
-class VintedPhoto {
-  constructor(photo) {
-    this.id = validateId(photo.id);
-    this.imageNo = validateNumber(photo.image_no);
-    this.width = validateNumber(photo.width);
-    this.height = validateNumber(photo.height);
-    this.url = validateUrl(photo.url);
-    this.dominantColor = validateString(photo.dominant_color);
-    this.fullSizeUrl = validateUrl(photo.full_size_url);
-  }
-}
-
-class VintedUser {
-  constructor(userData) {
-    this.id = validateId(userData.id);
-    this.login = validateString(userData.login);
-    this.feedback_reputation = validateNumber(userData.feedback_reputation);
-    this.feedback_count = validateNumber(userData.feedback_count);
-    this.countryCode = validateString(userData.country_code).toLowerCase();
-
-    this.photo = userData.photo ? new VintedPhoto(userData.photo) : "https://upload.wikimedia.org/wikipedia/commons/9/99/Sample_User_Icon.png";
-
-    this.url = validateUrl(userData.profile_url);
-  }
-}
-
-class VintedItem {
+export class VintedItem {
   constructor(itemData) {
     this.id = validateId(itemData.id);
     this.title = validateString(itemData.title);
@@ -106,5 +52,3 @@ class VintedItem {
     return this.photos.length === 0 ? "#000000" : this.photos[0].dominantColor;
   }
 }
-
-export { VintedItem, VintedPhoto };

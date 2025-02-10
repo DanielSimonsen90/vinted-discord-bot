@@ -1,8 +1,9 @@
 import { IntentsBitField, Client, GatewayIntentBits, ActivityType } from 'discord.js';
-import { registerCommands, handleCommands } from './commands_handler.js';
 import ConfigurationManager from '../managers/config_manager.js';
 import Logger from '../utils/logger.js';
-import * as crud from '../database/crud.js';
+import { getAllVintedChannels } from '../database/crud.js';
+
+import { registerCommands, handleCommands } from './commands_handler.js';
 
 import subToPushes from '../mikkel-resell/sub-to-pushes.js';
 
@@ -23,10 +24,10 @@ client.once('ready', async () => {
   Logger.info('Client is ready!');
   await registerCommands(client, discordConfig);
 
-  if (!ConfigurationManager.getBotDevMode) subToPushes(client);
+  if (!ConfigurationManager.getDevMode) subToPushes(client);
 
   const setPresence = () => {
-    const channelCount = crud.getAllVintedChannels().length ?? 0;
+    const channelCount = getAllVintedChannels().length ?? 0;
     client.user.setPresence({
       activities: [{
         name: `${channelCount} channels`,

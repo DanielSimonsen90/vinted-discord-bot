@@ -4,3 +4,4 @@ export { ModelCollection as SchemaCollection } from './models/ModelCollection.js
 
 export * from './constants.js';
 export * from './functions.js';
+export * from './crud.js';

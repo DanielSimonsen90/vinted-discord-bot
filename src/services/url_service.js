@@ -4,8 +4,11 @@ import Fuse from 'fuse.js'; // Import Fuse.js
 import Logger from '../utils/logger.js';
 import { isSubcategory } from '../database/index.js';
 import ConfigurationManager from '../managers/config_manager.js';
+import { VintedItem } from '../entities/VintedItem.js';
 
-const blacklisted_countries_codes = ConfigurationManager.getAlgorithmSetting.blacklistedCountryCodes;
+const blacklistedCountriesCodes = ConfigurationManager.getAlgorithmSetting.blacklistedCountryCodes;
+// the base URL for monitoring Vinted products
+const VALID_BASE_URL = "catalog";
 
 function parseVintedSearchParams(url) {
   try {
@@ -41,11 +44,11 @@ function parseVintedSearchParams(url) {
 function matchVintedItemToSearchParams(item, searchParams, bannedKeywords, countries_codes = []) {
 
   // Check blacklisted countries
-  const isBlacklistedCountry = blacklisted_countries_codes.includes(item.user.countryCode);
+  const isBlacklistedCountry = blacklistedCountriesCodes.includes(item.user.countryCode);
   const isRegisteredCountry = countries_codes.length && countries_codes.includes(item.user.countryCode);
   if (isBlacklistedCountry || !isRegisteredCountry) {
-    if (isBlacklistedCountry) console.debug('Blacklisted country, ' + item.user.countryCode);
-    else console.debug('Outisde of countries_codes scope, ' + item.user.countryCode);
+    if (isBlacklistedCountry) Logger.debug('Blacklisted country, ' + item.user.countryCode);
+    else Logger.debug('Outisde of countries_codes scope, ' + item.user.countryCode);
     return false;
   }
 
@@ -113,6 +116,12 @@ function matchVintedItemToSearchParams(item, searchParams, bannedKeywords, count
   return true;
 }
 
+/**
+ * @param {Array<VintedItem>} items 
+ * @param {string} url 
+ * @param {Array<string>} bannedKeywords 
+ * @param {Array<string>} countries_codes 
+ */
 export function filterItemsByUrl(items, url, bannedKeywords, countries_codes = []) {
   const searchParams = parseVintedSearchParams(url);
   if (!searchParams) return [];
@@ -120,10 +129,10 @@ export function filterItemsByUrl(items, url, bannedKeywords, countries_codes = [
   return items.filter(item => matchVintedItemToSearchParams(item, searchParams, bannedKeywords, countries_codes));
 }
 
-// the base URL for monitoring Vinted products
-const VALID_BASE_URL = "catalog";
-
-// validate that the URL is a Vinted catalog URL with at least one query parameter
+/**
+ * Validate that the URL is a Vinted catalog URL with at least one query parameter
+ * @param {string} url The url to validate
+ */
 export function validateUrl(url) {
   if (!url) return "invalid-url";
 
@@ -149,11 +158,15 @@ export function validateUrl(url) {
   }
 }
 
+/**
+ * Check if the URL contains the search_text query parameter
+ * @param {string} url The url to check
+ */
 export function urlContainsSearchTextParameter(url) {
   return new URL(url).searchParams.has('search_text');
 }
 
-// get .fr or other domain from the URL
+// get .<domain> from the URL
 export function getDomainInUrl(url) {
   const urlObj = new URL(url);
   let domain = urlObj.hostname.split('.').pop();

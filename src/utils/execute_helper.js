@@ -29,7 +29,7 @@ async function executeWithDetailedHandling(asyncFn, ...params) {
     return {
       success: true,
       code: 200, // HTTP status for OK
-      ...result
+        ...result
     };
   } catch (error) {
     if (!error) throw new Error('An unknown error occurred');

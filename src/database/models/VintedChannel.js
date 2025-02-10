@@ -15,16 +15,21 @@ import Model from "./Model.js";
 
 export class VintedChannel extends Model {
   /**
-   * @param {string} channelId
-   * @param {Date} lastUpdated
-   * @param {boolean} keepMessageSent
-   * @param {string} name
-   * @param {string} url
-   * @param {string[]} bannedKeywords
-   * @param {boolean} isMonitoring
-   * @param {string} type
-   * @param {string} user
-   * @param {Record<string, Array<any>>} preferences
+   * @typedef {Object} VintedChannelData
+   * @property {string} channelId
+   * @property {Date} lastUpdated
+   * @property {boolean} keepMessageSent
+   * @property {string} name
+   * @property {string} url
+   * @property {string[]} bannedKeywords
+   * @property {boolean} isMonitoring
+   * @property {string} type
+   * @property {string} user
+   * @property {Record<string, Array<any>>} preferences
+   */
+
+  /**
+   * @param {VintedChannelData} data
    */
   constructor({
     channelId, lastUpdated, keepMessageSent, 

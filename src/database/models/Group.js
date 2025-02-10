@@ -6,8 +6,13 @@ import Model from "./Model.js";
 });*/
 export class Group extends Model {
   /**
-   * @param {string} name
-   * @param {string[]} users
+   * @typedef {Object} GroupData
+   * @property {string} name
+   * @property {string[]} users
+   */
+
+  /**
+   * @param {GroupData} data
    */
   constructor({ name, users }) {
     super();

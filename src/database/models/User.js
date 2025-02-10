@@ -11,11 +11,16 @@ import Model from './Model.js';
 
 export class User extends Model {
   /**
-   * @param {string} discordId
-   * @param {string[]} channels
-   * @param {Date} lastUpdated
-   * @param {number} maxChannels
-   * @param {Record<string, any>} preferences
+   * @typedef {Object} UserData
+   * @property {string} discordId
+   * @property {Date} lastUpdated
+   * @property {string[]} [channels]
+   * @property {number} [maxChannels]
+   * @property {Record<string, any>} [preferences]
+   */
+
+  /**
+   * @param {UserData} data
    */
   constructor({
     discordId, lastUpdated,

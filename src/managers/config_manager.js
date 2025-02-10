@@ -1,7 +1,6 @@
-import dotenv from 'dotenv';
 import path from 'path';
 import fs from 'fs';
-
+import dotenv from 'dotenv';
 dotenv.config();
 
 // Check if .env.local exists and load environment variables from it, overriding the default .env values
@@ -61,7 +60,6 @@ class ConfigurationManager {
   };
 
   static getDevMode = process.env.DEV_MODE == 1
-  static getBotDevMode = process.env.BOT_DEV_MODE == 1
   static getDumpLogs = process.env.DUMP_LOGS == 1
 }
 

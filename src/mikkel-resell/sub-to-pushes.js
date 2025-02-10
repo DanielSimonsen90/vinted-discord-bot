@@ -1,9 +1,10 @@
 import * as Discord from 'discord.js';
 import shell from 'shelljs';
 
+const { GIT_REPO_NAME, GIT_REPO_MAIN_BRANCH_NAME } = process.env;
+
 /**
  * @param {Discord.Client} client 
- * @returns 
  */
 export default async function handleGit(client) {
   const guildId = process.env.DISCORD_GUILD_ID;
@@ -17,8 +18,6 @@ export default async function handleGit(client) {
     else danho.send('Git channel not found');
     return;
   }
-
-  const { GIT_REPO_NAME, GIT_REPO_MAIN_BRANCH_NAME } = process.env;
 
   const messages = await gitChannel.messages.fetch({ limit: 5 });
   if (!messages) return console.warn(`Could not fetch messages from git channel`);

@@ -1,26 +1,10 @@
-class EventEmitter {
-  constructor() {
-    this.events = {};
-  }
+import EventEmitter from 'events';
 
-  // Subscribe to an event
-  on(event, listener) {
-    (this.events[event] ??= []).push(listener);
-  }
+/**
+ * @type {EventEmitter<{
+ *  'refresh-monitored-channels': []
+ * }>}
+ */
 
-  // Unsubscribe from an event
-  off(event, listenerToRemove) {
-    if (!this.events[event]) return;
-
-    this.events[event] = this.events[event].filter(listener => listener !== listenerToRemove);
-  }
-
-  // Emit an event
-  emit(event, payload = null) {
-    if (!this.events[event]) return;
-
-    this.events[event].forEach(listener => listener(payload));
-  }
-}
-
-export default EventEmitter;
+export const emitter = new EventEmitter();
+export default emitter;

@@ -17,7 +17,7 @@ class LanguageService {
     fs.readdirSync(this.localesDir).forEach(file => {
       const filePath = path.join(this.localesDir, file);
       const lang = path.basename(file, '.json');
-      Logger.debug(`Loading language file for ${lang}`);
+      // Logger.debug(`Loading language file for ${lang}`);
       this.languages[lang] = JSON.parse(fs.readFileSync(filePath, 'utf-8'));
     });
   }

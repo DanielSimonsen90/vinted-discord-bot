@@ -1,10 +1,12 @@
+import Model from "./Model.js";
+
 /**
  * @template T
  * @extends Array<T>
  */
 export class ModelCollection extends Array {
   /**
-   * @type {Record<string, typeof Schema | undefined>}
+   * @type {Record<string, typeof Model | undefined>}
    */
   #relations = {};
   /**

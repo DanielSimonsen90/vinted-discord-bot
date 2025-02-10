@@ -30,7 +30,7 @@ export async function listProxies(apiKey, timeout = 10000) {
       const controller = new AbortController();
       const timeoutId = setTimeout(() => controller.abort(), timeout);
 
-      const req = await fetch(url.href, {
+      const response = await fetch(url.href, {
         method: "GET",
         headers: {
           Authorization: "Token " + apiKey,
@@ -40,13 +40,13 @@ export async function listProxies(apiKey, timeout = 10000) {
 
       clearTimeout(timeoutId);
 
-      if (!req.ok) throw new Error(`HTTP error! Status: ${req.status}`);
+      if (!response.ok) throw new Error(`HTTP error! Status: ${response.status}`);
 
-      const res = await req.json();
-      const proxies = res.results.map(proxy => new Proxy(proxy.proxy_address, proxy.port, proxy.username, proxy.password));
+      const data = await response.json().catch(console.error);
+      const proxies = data.results.map(proxy => new Proxy(proxy.proxy_address, proxy.port, proxy.username, proxy.password));
 
       allProxies = allProxies.concat(proxies);
-      totalPages = Math.ceil(res.count / 100);
+      totalPages = Math.ceil(data.count / 100);
       page++;
     } catch (error) {
       if (error.name === 'AbortError') throw new Error('Request timed out');

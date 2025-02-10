@@ -1,15 +1,10 @@
-import {
-  User, VintedChannel,
-  UserRepository, VintedChannelRepository,
-  REPOS,
-  SchemaCollection
-} from "./index.js";
+import { User, VintedChannel } from './models/index.js';
+import { UserRepository, VintedChannelRepository, REPOS } from './repositories/index.js';
 import EventEmitter from "../utils/event_emitter.js";
 import ConfigurationManager from "../managers/config_manager.js";
 
 const userDefaultConfig = ConfigurationManager.getUserConfig;
 const discordAdminIds = ConfigurationManager.getDiscordConfig.adminRoleIds;
-export const eventEmitter = new EventEmitter();
 
 /**
  * @param {import('discord.js').RepliableInteraction} interaction 
@@ -43,7 +38,6 @@ export function createUser({ discordId, preferences = {}, channels = [], lastUpd
     maxChannels: userDefaultConfig.defaultMaxPrivateChannels,
   }));
   UserRepository.save();
-  eventEmitter.emit('updated');
 
   return user;
 }
@@ -93,7 +87,7 @@ export async function getOrCreateUserByDiscordId(discordId) {
 export async function updateUser(id, { preferences, channels, lastUpdated, timeMonitored }) {
   const update = { preferences, channels, lastUpdated, timeMonitored };
   const result = UserRepository.findByIdAndUpdate(id, update, { new: true });
-  eventEmitter.emit('updated');
+  EventEmitter.emit('refresh-monitored-channels');
   return result;
 }
 
@@ -109,7 +103,6 @@ export async function setUserMaxChannels(discordId, maxChannels) {
 
   user.maxChannels = maxChannels;
   const result = await user.save();
-  eventEmitter.emit('updated');
   return result;
 }
 
@@ -151,7 +144,7 @@ export async function setPreferenceKey(repo, idKey, idValue, key, value) {
     repo.save();
   }
 
-  eventEmitter.emit('updated');
+  EventEmitter.emit('refresh-monitored-channels');
   return entities;
 }
 
@@ -181,7 +174,7 @@ export async function addToPreferenceKey(repo, idKey, idValue, key, value) {
     repo.save();
   }
 
-  eventEmitter.emit('updated');
+  EventEmitter.emit('refresh-monitored-channels');
   return entity;
 }
 
@@ -209,7 +202,7 @@ export async function removeFromPreferenceKey(repo, idKey, idValue, key, value) 
     }
   }
 
-  eventEmitter.emit('updated');
+  EventEmitter.emit('refresh-monitored-channels');
   return entity;
 }
 // #endregion
@@ -282,7 +275,6 @@ export async function setVintedChannelKeepMessageSent(channelId, keepMessageSent
 /**
  * Create a new Vinted channel.
  * @param {Partial<VintedChannel> & Pick<VintedChannel, 'channelId' | 'name'>} channelData - The channel data.
- * @returns {Promise<VintedChannel>} - The created channel.
  */
 export function createVintedChannel({
   channelId, name,
@@ -297,14 +289,13 @@ export function createVintedChannel({
     preferences, bannedKeywords
   }));
   VintedChannelRepository.save();
-  eventEmitter.emit('updated');
+  EventEmitter.emit('refresh-monitored-channels');
   return result;
 }
 
 /**
  * Get a Vinted channel by its ID.
  * @param {string} id - The channel ID.
- * @returns {Promise<VintedChannel>} - The channel.
  */
 export async function getVintedChannelById(id) {
   return VintedChannelRepository.findOne({ id })?.populate({
@@ -313,10 +304,6 @@ export async function getVintedChannelById(id) {
   });
 }
 
-/**
- * Get all Vinted channels.
- * @returns {Array<SchemaCollection<VintedChannel>>} - The list of channels.
- */
 export async function getAllVintedChannels() {
   return VintedChannelRepository.find()?.populate({
     property: 'user',
@@ -324,10 +311,6 @@ export async function getAllVintedChannels() {
   });
 }
 
-/**
- * Get all private Vinted channels.
- * @returns {Array<SchemaCollection<VintedChannel>>} - The list of channels.
- */
 export function getAllPrivateVintedChannels() {
   return VintedChannelRepository.find({ type: 'private' })?.populate({
     property: 'user',
@@ -355,7 +338,7 @@ function parseVintedSearchParams(url) {
   }
 }
 
-export async function getAllMonitoredVintedChannels() {
+export function getAllMonitoredVintedChannels() {
   return VintedChannelRepository.find({ isMonitoring: true })?.populate({
     property: 'user',
     repo: UserRepository
@@ -365,8 +348,9 @@ export async function getAllMonitoredVintedChannels() {
   });
 }
 
-export async function getAllMonitoredVintedChannelsBrandMap() {
-  const channels = await getAllMonitoredVintedChannels();
+export function getAllMonitoredVintedChannelsBrandMap() {
+  const channels = getAllMonitoredVintedChannels();
+  /** @type {Map<string, Array<VintedChannel>} */
   const brandMap = new Map();
 
   for (const channel of channels) {
@@ -400,7 +384,7 @@ export async function getAllVintedChannelsByDiscordId(discordId) {
 export async function updateVintedChannel(id, { channelId, lastUpdated, name, url, isMonitoring, type, user }) {
   const update = { channelId, lastUpdated, name, url, isMonitoring, type, user };
   const result = VintedChannelRepository.findByIdAndUpdate(id, update, { new: true });
-  eventEmitter.emit('updated');
+  EventEmitter.emit('refresh-monitored-channels');
   return result;
 }
 
@@ -412,8 +396,7 @@ export async function updateVintedChannel(id, { channelId, lastUpdated, name, ur
  */
 export async function startVintedChannelMonitoring(id, url) {
   const channel = VintedChannelRepository.findByIdAndUpdate(id, { isMonitoring: true, url }, { new: true });
-  eventEmitter.emit('startMonitoring', channel); // TODO: use this lol
-  eventEmitter.emit('updated');
+  EventEmitter.emit('refresh-monitored-channels');
   VintedChannelRepository.save();
   return channel;
 }
@@ -425,8 +408,7 @@ export async function startVintedChannelMonitoring(id, url) {
  */
 export async function stopVintedChannelMonitoring(id) {
   const channel = VintedChannelRepository.findByIdAndUpdate(id, { isMonitoring: false }, { new: true });
-  eventEmitter.emit('stopMonitoring', channel);
-  eventEmitter.emit('updated');
+  EventEmitter.emit('refresh-monitored-channels');
   return channel;
 }
 
@@ -437,7 +419,7 @@ export async function stopVintedChannelMonitoring(id) {
  */
 export async function deleteVintedChannel(id) {
   const result = VintedChannelRepository.findByIdAndDelete(id);
-  eventEmitter.emit('updated');
+  EventEmitter.emit('refresh-monitored-channels');
   return result;
 }
 
@@ -469,7 +451,7 @@ export async function addChannelToUser(userId, channelId) {
   user.channels.push(channelId);
   UserRepository.findByIdAndUpdate(userId, user);
   UserRepository.save();
-  eventEmitter.emit('updated');
+  EventEmitter.emit('refresh-monitored-channels');
 }
 
 /**
@@ -481,7 +463,6 @@ export async function addChannelToUser(userId, channelId) {
 export async function checkChannelInUser(userId, channelId) {
   const user = UserRepository.findById(userId);
   if (user) return user.channels.includes(channelId);
-  eventEmitter.emit('updated'); // ?? what are we updating
 }
 
 /**
@@ -501,7 +482,7 @@ export async function removeChannelFromUser(userId, channelId) {
     UserRepository.findByIdAndUpdate(user.id, user);
     UserRepository.save();
   }
-  eventEmitter.emit('updated');
+  EventEmitter.emit('refresh-monitored-channels');
 }
 
 export async function removeChannelFromUserByIds(discordId, channelId) {
@@ -516,7 +497,7 @@ export async function removeChannelFromUserByIds(discordId, channelId) {
     UserRepository.findByIdAndUpdate(user.id, user);
     UserRepository.save();
   }
-  eventEmitter.emit('updated');
+  EventEmitter.emit('refresh-monitored-channels');
 }
 
 export async function getUserFromChannel(channelId) {

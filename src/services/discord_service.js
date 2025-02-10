@@ -11,10 +11,9 @@ import * as crud from '../database/crud.js';
 import { createBaseEmbed } from '../bot/components/base_embeds.js';
 
 import LanguageService from './language_service.js';
+import { createVintedItemActionRow, createVintedItemEmbed } from '../bot/components/item_embed.js';
 
-const discordConfig = ConfigurationManager.getDiscordConfig;
-const guildId = discordConfig.guildId;
-const threadChannelId = discordConfig.threadChannelId;
+const { guildId, threadChannelId, channelInactivityHours, channelInactivityDeleteHours } = ConfigurationManager.getDiscordConfig;
 
 /**
  * Create a category on Discord if it doesn't exist.
@@ -77,7 +76,7 @@ export async function checkVintedChannelInactivity(client) {
       if (keepMessageSent) continue;
 
       // Check if the lastUpdated is more than 72 hours ago
-      if (hoursAgo(lastUpdated) > discordConfig.channelInactivityHours) {
+      if (hoursAgo(lastUpdated) > channelInactivityHours) {
         const userData = await crud.getUserById(user);
         if (!userData) continue;
 
@@ -123,7 +122,7 @@ export async function checkVintedChannelInactivity(client) {
         // Create a message component collector to wait for the user's response
         message.createMessageComponentCollector({
           filter: i => i.user.id === userData.discordId,
-          time: discordConfig.channelInactivityDeleteHours * 60 * 60 * 1000, // 24 hours in milliseconds
+          time: channelInactivityDeleteHours * 60 * 60 * 1000, // 24 hours in milliseconds
         }).on('collect', async interaction => {
           if (interaction.customId === 'keep_channel' + userData.discordId) {
             // User wants to keep the channel
@@ -213,3 +212,27 @@ export async function postMessageToChannel(
     }
   }
 }
+
+export async function sendToChannel(item, user, vintedChannel) {
+  // get the domain from the URL between vinted. and the next /
+  const domain = vintedChannel.url.match(/vinted\.(.*?)\//)[1];
+  const { embed, photosEmbeds } = await createVintedItemEmbed(item, domain);
+  const actionRow = await createVintedItemActionRow(item, domain);
+
+  const doMentionUser = user && vintedChannel.preferences[Preference.Mention];
+  const mentionString = doMentionUser ? `<@${user.discordId}>` : '';
+
+  try {
+    await postMessageToChannel(
+      ConfigurationManager.getDiscordConfig.token,
+      vintedChannel.channelId,
+      `${mentionString} `,
+      [embed, ...photosEmbeds],
+      [actionRow]
+    );
+  }
+  catch (error) {
+    Logger.debug('Error posting message to channel');
+    Logger.debug(error);
+  }
+};

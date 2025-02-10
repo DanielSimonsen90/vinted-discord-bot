@@ -1,6 +1,7 @@
 import Logger from "../utils/logger.js";
-import { fetchCatalogItems } from "../api/fetchCatalogItems.js";
-import { fetchItem } from "../api/fetchItem.js";
+import ApiService from '../services/api_service.js';
+import { buildCategoryMapFromRoots } from "../database/functions.js";
+import ConfigurationManager from "../managers/config_manager.js";
 
 /**
  * Manage concurrency and fetching logic.
@@ -27,8 +28,8 @@ let currentID = 0;
 
 let concurrency = 0;
 
-function initializeConcurrency(concurrent_requests) {
-  concurrency = concurrent_requests;
+function initializeConcurrency() {
+  concurrency = ConfigurationManager.getProxiesConfig.concurrentRequests;
   computedConcurrency = concurrency;
 }
 
@@ -38,7 +39,7 @@ function initializeConcurrency(concurrent_requests) {
  * @returns {Promise<Object>} - Promise resolving to the highest item ID.
  */
 async function findHighestID(cookie) {
-  const response = await fetchCatalogItems({ cookie });
+  const response = await ApiService.fetchCatalogItems({ cookie });
   if (!response.items) throw new Error("Error fetching catalog items.");
 
   const maxID = Math.max(...response.items.map(item => parseInt(item.id)));
@@ -49,16 +50,16 @@ async function findHighestID(cookie) {
  * Log current status at regular intervals.
  */
 setInterval(() => {
-  const totalRequests = requestPerSecond + rateLimitErrorsPerSecond;
-  const requestSuccessRate = totalRequests ? ((requestPerSecond / totalRequests) * 100).toFixed(2) : 0;
+  // const totalRequests = requestPerSecond + rateLimitErrorsPerSecond;
+  // const requestSuccessRate = totalRequests ? ((requestPerSecond / totalRequests) * 100).toFixed(2) : 0;
 
-  Logger.debug(`Requests per second: ${requestPerSecond}, Step: ${step}, Consecutive errors: ${consecutiveErrors}, Rate limit errors per second: ${rateLimitErrorsPerSecond}, Valid items per second: ${validItemsPerSecond}`);
-  Logger.debug(`Active promises: ${activePromises.size}`);
-  Logger.debug(`Current ID: ${currentID}, Last published time: ${lastPublishedTime}, ID time since last publication: ${idTimeSinceLastPublication}`);
-  const numberOfItemBetweenRange = maxFetchedRange - minFetchedRange;
-  Logger.debug(`minFetchedRange: ${minFetchedRange}, maxFetchedRange: ${maxFetchedRange}, numberOfItemBetweenRange: ${numberOfItemBetweenRange}`);
-  Logger.debug(`Request success rate: ${requestSuccessRate}%`);
-  Logger.debug(`Concurrency: ${computedConcurrency}`);
+  // Logger.debug(`Requests per second: ${requestPerSecond}, Step: ${step}, Consecutive errors: ${consecutiveErrors}, Rate limit errors per second: ${rateLimitErrorsPerSecond}, Valid items per second: ${validItemsPerSecond}`);
+  // Logger.debug(`Active promises: ${activePromises.size}`);
+  // Logger.debug(`Current ID: ${currentID}, Last published time: ${lastPublishedTime}, ID time since last publication: ${idTimeSinceLastPublication}`);
+  // const numberOfItemBetweenRange = maxFetchedRange - minFetchedRange;
+  // Logger.debug(`minFetchedRange: ${minFetchedRange}, maxFetchedRange: ${maxFetchedRange}, numberOfItemBetweenRange: ${numberOfItemBetweenRange}`);
+  // Logger.debug(`Request success rate: ${requestSuccessRate}%`);
+  // Logger.debug(`Concurrency: ${computedConcurrency}`);
 
   rateLimitErrorsPerSecond = 0;
 
@@ -180,7 +181,7 @@ async function launchFetch(id, cookie, callback) {
  */
 async function fetchAndHandleItemSafe(cookie, itemID, callback) {
   // Fetch the item with the given ID and cookie
-  const response = await fetchItem({ cookie, item_id: itemID });
+  const response = await ApiService.fetchItem({ cookie, item_id: itemID });
 
   // If the item was successfully fetched
   if (response.item) {
@@ -274,10 +275,31 @@ async function findHighestIDUntilSuccessful(cookie) {
   }
 }
 
+async function getCatalogRoots() {
+  Logger.info('Fetching catalog roots from Vinted');
+  const getCookie = await import("../managers/cookie_manager.js");
+
+  let roots;
+  while (!roots) {
+    try {
+      roots = await ApiService.fetchCatalogInitializer(getCookie());
+      if (roots) {
+        buildCategoryMapFromRoots(roots);
+        Logger.info('Fetched catalog roots from Vinted');
+      }
+    } catch (error) {
+      Logger.debug('Error fetching catalog roots');
+      console.error(error);
+      await new Promise(resolve => setTimeout(resolve, 200));
+    }
+  }
+}
+
 const CatalogService = {
   initializeConcurrency,
   fetchUntilCurrentAutomatic,
   findHighestIDUntilSuccessful,
+  getCatalogRoots,
 };
 
 export default CatalogService;
