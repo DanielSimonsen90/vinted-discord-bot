@@ -5,7 +5,7 @@ import { getAllVintedChannels } from '../database/crud.js';
 
 import { registerCommands, handleCommands } from './commands_handler.js';
 
-import subToPushes from '../mikkel-resell/sub-to-pushes.js';
+import subToPushes from './sub-to-pushes.js';
 
 const client = new Client({
   intents: [
